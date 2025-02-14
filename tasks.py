@@ -8,7 +8,7 @@ from src.inventory_group import update_inventory_group
 
 
 @task
-def template(
+def inventory_template(
     _,
     envs: str,
     client_code: str,

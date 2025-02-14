@@ -49,7 +49,7 @@ invoke task assumes you already have already authenticated with aws. It will ass
 Ensure you are in a virtual environment before running the following command:
 
 ```
-inv template --envs <env> --client-code <client-code> --client-account-aws-profile <profile-name>
+inv inventory-template --envs <env> --client-code <client-code> --client-account-aws-profile <profile-name>
 ```
 
 ### Run ansible playbook

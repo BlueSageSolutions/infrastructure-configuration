@@ -8,16 +8,6 @@
     {{ instance.get_name().replace('-', '_') }}:
       ansible_host: {{ instance.get_ip_address() }}
       apps: {{ apps }}
-      nginx:
-    {%- if apps == ['lendingservices', 'lion'] %}
-        443:
-          apps: ['lendingservices']
-        1443:
-          apps: ['lion']
-    {%- else %}    
-        443:
-          nginx_apps: {{ apps }}
-    {%- endif %}
 {%- endfor %}
 {%- endfor %}
 

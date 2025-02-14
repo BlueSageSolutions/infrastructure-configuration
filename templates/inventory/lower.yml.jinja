@@ -4,15 +4,9 @@
 {%- set instances = instances | selectattr("env", "equalto", env) -%}
 {%- set rds_creds = rds_creds | selectattr("env", "equalto", env) | list -%}
 {%- for instance in instances -%}
-  {% set nginx_ports = nginx_port_mappings | selectattr("instance_name", "equalto", "-".join(instance.get_name().split("-")[:3])) | list%}
     {{ instance.get_name().replace('-', '_') }}:
       ansible_host: {{ instance.get_ip_address() }}
       apps: {{ instance.get_apps() }}
-      nginx:
-      {%- for (port, apps) in nginx_ports[0].mappings().items() %}
-        {{ port }}: 
-          nginx_apps: {{ apps }}
-      {%- endfor %}
 {%- endfor %}
   vars:
     db_pwd: {{ rds_creds[0].get_password() }}
