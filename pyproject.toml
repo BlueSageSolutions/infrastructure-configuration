@@ -1,0 +1,29 @@
+[project]
+name = "ansible-intentory-templater"
+version = "0.1.0"
+description = ""
+readme = "README.md"
+
+[tool.poetry]
+package-mode = false
+
+[tool.poetry.dependencies]
+python = ">=3.11" 
+boto3 = "^1.36.7"
+invoke = "^2.2.0"
+pydantic = "^2.10.6"
+jinja2 = "^3.1.5"
+pyyaml = "^6.0.2"
+ansible = "^11.2.0"
+
+[tool.poetry.group.dev]
+optional = true
+
+# install dev dependencies:
+# https://python-poetry.org/docs/managing-dependencies/#optional-groups
+[tool.poetry.group.dev.dependencies]
+black = "^25.1.0"
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"

@@ -1,0 +1,13 @@
+---
+- name: Setup Servers
+  hosts: all
+  gather_facts: no
+  vars:
+    client: "{{ inventory_hostname.split('_')[0] }}"
+    env: "{{ inventory_hostname.split('_')[1] }}"
+    apps: "{{ hostvars[inventory_hostname].apps }}"
+
+  tasks:
+    - name: Install New Relic Java Agent
+      include_role:
+        name: newrelic

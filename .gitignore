@@ -1,0 +1,9 @@
+.venv/
+.python-version
+inventory/prod/*.yml
+inventory/lower/*.yml
+downloads/*
+
+foo.json
+01-bss-lower.yml
+01-bss-prod.yml

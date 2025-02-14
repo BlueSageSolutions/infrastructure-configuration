@@ -1,0 +1,75 @@
+- name: Set Varialbes
+  set_fact:
+    all_product_admin_role_id: 1254 
+
+- name: Get Client Account Id
+  delegate_to: localhost
+  shell: |
+    QUERY_ACCOUNT_RESPONSE=$(curl https://api.newrelic.com/graphql \
+      -H 'Content-Type: application/json' \
+      -H 'API-Key: {{api_key}}' \
+      --data-binary '{
+                        "query": "{actor {organization {accountManagement {managedAccounts(isCanceled: false) {name id}}}}}",
+                        "variables": ""
+                    }'
+    )
+
+    CLIENT_ACCOUNT_METADATA=$(echo $QUERY_ACCOUNT_RESPONSE | jq '.data.actor.organization.accountManagement.managedAccounts.[] | select(.name == "{{client}}")')
+
+    if [ -z "$CLIENT_ACCOUNT_METADATA" ]; then
+      echo Account associated with client {{client}} was not found!
+      exit 1
+    fi
+
+    ACCOUNT_ID=$(echo $CLIENT_ACCOUNT_METADATA | jq .id)
+    echo $ACCOUNT_ID
+
+  register: client_account_id
+
+- name: Set Account Id as Fact
+  set_fact:
+    account_id: "{{ client_account_id.stdout }}"
+
+- name: Update Account Management Group Permissions
+  delegate_to: localhost
+  shell: |
+    UPDATE_PERMISSIONS_RESPONSE=$(curl https://api.newrelic.com/graphql \
+      -H 'Content-Type: application/json' \
+      -H 'API-Key: {{api_key}}' \
+      --data-binary '{
+                        "query": "mutation {authorizationManagementGrantAccess(grantAccessOptions: {groupId: \"{{group_id}}\" accountAccessGrants: {accountId: {{account_id}} roleId: \"{{all_product_admin_role_id}}\"}}) {roles {displayName accountId}}}",
+                        "variables": ""
+                    }'
+    )
+
+- name: Get Client License Key
+  delegate_to: localhost
+  shell: |
+    SSM_PATH=/secrets/{{client}}/prod/newrelic/license_key
+    LICENSE_KEY=$(aws ssm get-parameter --name $SSM_PATH --with-decryption --query "Parameter.Value" --output text)
+
+    if [ -z "$LICENSE_KEY" ]; then
+      # create license key and add to aws ssm
+      CREATE_LICENSE_KEY_RESPONSE=$(curl https://api.newrelic.com/graphql \
+        -H 'Content-Type: application/json' \
+        -H 'API-Key: {{api_key}}' \
+        --data-binary '{
+                          "query": "mutation {apiAccessCreateKeys(keys: {ingest: {accountId: {{account_id}}, ingestType: LICENSE, name: \"License Key for Java Agent\", notes: \"This key was created by ansible setup script for java agent data ingestion\"}}) {createdKeys {id key name notes type ... on ApiAccessIngestKey {ingestType}} errors {message type ... on ApiAccessIngestKeyError {accountId errorType ingestType}}}}",
+                          "variables": ""
+                      }'
+      )
+
+      LICENSE_KEY=$(echo $CREATE_LICENSE_KEY_RESPONSE | jq -r '.data.apiAccessCreateKeys.createdKeys.[0].key')
+      aws ssm put-parameter --name $SSM_PATH --value $LICENSE_KEY --type SecureString  > /dev/null
+
+      echo $LICENSE_KEY
+    else
+      echo $LICENSE_KEY
+    fi
+  register: client_license_key
+
+- name: Set Key as Fact
+  set_fact:
+    client_license_key: "{{ client_license_key.stdout }}"
+- debug:
+    var: client_license_key

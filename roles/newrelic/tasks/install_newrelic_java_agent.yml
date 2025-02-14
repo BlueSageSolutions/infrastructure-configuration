@@ -1,0 +1,50 @@
+- name: Set Install Variables
+  run_once: true
+  set_fact:
+    java_agent_version: 7.11.1
+    output_dir: ./downloads
+    zip_file_name: newrelic-java.zip
+
+- name: Download the new Java Agent
+  run_once: true
+  delegate_to: localhost
+  shell: |
+    if [ ! -f {{output_dir}}/{{ zip_file_name }} ]; then
+      # file does not exists
+      wget https://download.newrelic.com/newrelic/java-agent/newrelic-agent/{{java_agent_version}}/{{ zip_file_name }} -O {{output_dir}}/{{ zip_file_name }}
+    fi
+
+- name: Unzip Java Agent Download
+  run_once: true
+  delegate_to: localhost
+  shell: |
+    unzip -o {{output_dir}}/{{ zip_file_name }} -d {{output_dir}}
+
+- name: Copy New Relic Artifacts to Server
+  loop: "{{ apps }}"
+  when: item in ["lendingservices", "lp", "crm", "portal", "admin"]
+  synchronize:
+    src: "{{output_dir}}/newrelic"
+    dest: '/opt/bin/{{item}}'
+    rsync_opts:
+      - "--chmod=ugo+rwx"
+  become: yes
+
+- name: Template NewRelic Config
+  loop: "{{ apps }}"
+  when: item in ["lendingservices", "lp", "crm", "portal", "admin"]
+  template:
+    src: ../../../templates/newrelic/newrelic.yml.j2
+    dest: '/opt/bin/{{item}}/newrelic/newrelic.yml'
+  vars:
+    app_name: "{{ client }}-{{ env }}-{{ item }}-{{ inventory_hostname | split('_') | last }}"
+    labels: app:{{item}};client:{{client}};env:{{env}}
+
+- name: Update Startup Script
+  loop: "{{ apps }}"
+  when: item in ["lendingservices", "lp", "crm", "portal", "admin"]
+  lineinfile:
+    path: '/opt/bin/{{item}}/{{item}}.sh'
+    regexp: '^#COMMONOPTS\+\=".*newrelic\.jar"$'
+    line: 'COMMONOPTS+=" -javaagent:$MY_PATH/newrelic/newrelic.jar"'
+    insertbefore: '^\$JVM'
