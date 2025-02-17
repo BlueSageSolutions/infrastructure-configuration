@@ -2,7 +2,6 @@
 {{ client_code }}_{{ env }}:
   hosts:
 {%- set instances = instances | selectattr("env", "equalto", env) -%}
-{%- set rds_creds = rds_creds | selectattr("env", "equalto", env) | list -%}
 {%- for instance in instances -%}
 {% set apps = instance.get_apps() %}
     {{ instance.get_name().replace('-', '_') }}:
@@ -13,6 +12,4 @@
 
   vars:
     ansible_ssh_private_key_file: {{ ssh_private_key_file_path }}
-    cluster_path: {{ rds_creds[0].get_hostname() }}
     aws_profile: {{ client_account_aws_profile }}
-    db_pwd: {{ rds_creds[0].get_password() }}
