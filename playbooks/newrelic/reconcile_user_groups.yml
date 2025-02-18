@@ -6,6 +6,8 @@
     authentication_domain_id: 0f4dda55-888e-4f4d-abba-ac7b3417faba
     client_management_group_name: ClientAccountManagement
     client_readonly_group_name: ClientAccountReadonly
+    all_product_admin_role_id: 1254
+    read_only_role_id: 1252
 
   tasks:
     - name: Get New Relic Service Account Key
@@ -93,6 +95,7 @@
       set_fact:
         client_readonly_group_id: "{{ client_readonly_group_id.stdout }}"
     
+    ####### Groups must be deleted and recreated before you are able to add users, otherwise api throws error and says group already exists
     - name: Delete client_management_group_name
       delegate_to: localhost
       run_once: true
@@ -159,6 +162,7 @@
       set_fact:
         client_readonly_group_id: "{{ client_readonly_group_id.stdout }}"
 
+    #######
     - name: Get FullPlatform BSS User Ids
       delegate_to: localhost
       run_once: true
@@ -214,3 +218,55 @@
                       }'
         )
         echo $ADD_BSS_FULLPLATFORM_USERS
+
+    - name: Query Accounts
+      delegate_to: localhost
+      run_once: true
+      shell: |
+        QUERY_ACCOUNT_RESPONSE=$(curl https://api.newrelic.com/graphql \
+          -H 'Content-Type: application/json' \
+          -H 'API-Key: {{api_key}}' \
+          --data-binary '{
+                            "query": "{actor {organization {accountManagement {managedAccounts(isCanceled: false) {name id}}}}}",
+                            "variables": ""
+                        }'
+        )
+
+        CLIENT_ACCOUNT_METADATA=$(echo $QUERY_ACCOUNT_RESPONSE | jq '.data.actor.organization.accountManagement.managedAccounts.[] | select(.name != "Blue Sage Solutions")')
+        CLIENT_ACCOUNT_IDS=$(echo $CLIENT_ACCOUNT_METADATA | jq -s '[.[].id]')
+
+        echo $CLIENT_ACCOUNT_IDS
+
+      register: client_account_ids
+
+    - name: Set Account Id as Fact
+      set_fact:
+        client_account_ids: "{{ client_account_ids.stdout }}"
+
+    - name: Update client_management_group_name Permissions
+      delegate_to: localhost
+      run_once: true
+      loop: "{{ client_account_ids }}"
+      shell: |
+        UPDATE_PERMISSIONS_RESPONSE=$(curl https://api.newrelic.com/graphql \
+          -H 'Content-Type: application/json' \
+          -H 'API-Key: {{api_key}}' \
+          --data-binary '{
+                            "query": "mutation {authorizationManagementGrantAccess(grantAccessOptions: {groupId: \"{{client_management_group_id}}\" accountAccessGrants: {accountId: {{item}} roleId: \"{{all_product_admin_role_id}}\"}}) {roles {displayName accountId}}}",
+                            "variables": ""
+                        }'
+        )
+
+    - name: Update client_readonly_group_name Permissions
+      delegate_to: localhost
+      run_once: true
+      loop: "{{ client_account_ids }}"
+      shell: |
+        UPDATE_PERMISSIONS_RESPONSE=$(curl https://api.newrelic.com/graphql \
+          -H 'Content-Type: application/json' \
+          -H 'API-Key: {{api_key}}' \
+          --data-binary '{
+                            "query": "mutation {authorizationManagementGrantAccess(grantAccessOptions: {groupId: \"{{client_readonly_group_id}}\" accountAccessGrants: {accountId: {{item}} roleId: \"{{read_only_role_id}}\"}}) {roles {displayName accountId}}}",
+                            "variables": ""
+                        }'
+        )
