@@ -19,7 +19,7 @@
     CLIENT_ACCOUNT_METADATA=$(echo $QUERY_ACCOUNT_RESPONSE | jq '.data.actor.organization.accountManagement.managedAccounts.[] | select(.name == "{{client | lower}}")')
 
     if [ -z "$CLIENT_ACCOUNT_METADATA" ]; then
-      echo Account associated with client {{client}} was not found!
+      echo Account associated with client {{client | lower}} was not found!
       exit 1
     fi
 
@@ -45,11 +45,27 @@
                     }'
     )
 
+- name: Get Date
+  delegate_to: localhost
+  run_once: true
+  shell: |
+    echo $(date)
+  register: date
+
+- name: Set Date Fact
+  delegate_to: localhost
+  run_once: true
+  set_fact:
+    date: "{{ date.stdout }}"
+
+- debug:
+    var: date
+
 - name: Get Client License Key
   delegate_to: localhost
   run_once: true
   shell: |
-    SSM_PATH=/secrets/{{client}}/prod/newrelic/license_key
+    SSM_PATH=/secrets/{{client | lower}}/prod/newrelic/license_key
     LICENSE_KEY=$(aws ssm get-parameter --name $SSM_PATH --with-decryption --query "Parameter.Value" --output text)
 
     if [ -z "$LICENSE_KEY" ]; then
@@ -58,7 +74,7 @@
         -H 'Content-Type: application/json' \
         -H 'API-Key: {{api_key}}' \
         --data-binary '{
-                          "query": "mutation {apiAccessCreateKeys(keys: {ingest: {accountId: {{account_id}}, ingestType: LICENSE, name: \"License Key for Java Agent\", notes: \"This key was created by ansible setup script for java agent data ingestion\"}}) {createdKeys {id key name notes type ... on ApiAccessIngestKey {ingestType}} errors {message type ... on ApiAccessIngestKeyError {accountId errorType ingestType}}}}",
+                          "query": "mutation {apiAccessCreateKeys(keys: {ingest: {accountId: {{account_id}}, ingestType: LICENSE, name: \"License Key for Java Agent\", notes: \"This key was created by ansible setup script for java agent data ingestion on : {{ date }}\"}}) {createdKeys {id key name notes type ... on ApiAccessIngestKey {ingestType}} errors {message type ... on ApiAccessIngestKeyError {accountId errorType ingestType}}}}",
                           "variables": ""
                       }'
       )
