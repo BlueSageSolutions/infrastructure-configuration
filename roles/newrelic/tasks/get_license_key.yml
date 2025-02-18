@@ -58,9 +58,6 @@
   set_fact:
     date: "{{ date.stdout }}"
 
-- debug:
-    var: date
-
 - name: Get Client License Key
   delegate_to: localhost
   run_once: true

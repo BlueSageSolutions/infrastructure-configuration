@@ -69,18 +69,61 @@
       set_fact:
         query_users: "{{ query_new_relic_users.stdout | from_json }}"
 
-    - debug:
-        var: query_users
-
-    - name: Create client_management_group_name Group if does not exist
+    - name: Get client_management_group_name group id
       delegate_to: localhost
       run_once: true
       shell: |
-        CLIENT_MANAGEMENT_GROUP=$(echo '{{ query_group | to_json }}' | jq '.data.actor.organization.userManagement.authenticationDomains.authenticationDomains.[0].groups.groups.[] | select(.displayName == "{{ client_management_group_name }}")')
+        CLIENT_MANAGEMENT_GROUP=$(echo '{{ query_group | to_json }}' | jq -r '.data.actor.organization.userManagement.authenticationDomains.authenticationDomains.[0].groups.groups.[] | select(.displayName == "{{ client_management_group_name }}") | .id')
+        echo $CLIENT_MANAGEMENT_GROUP
+      register: client_management_group_id
 
-        if [ -z "$CLIENT_MANAGEMENT_GROUP" ]; then
-          # create group if does not exist
-          CREATE_GROUP_RESPONSE=$(curl https://api.newrelic.com/graphql \
+    - name: set client_management_group_id fact
+      set_fact:
+        client_management_group_id: "{{ client_management_group_id.stdout }}"
+
+    - name: Get client_readonly_group_name group id
+      delegate_to: localhost
+      run_once: true
+      shell: |
+        CLIENT_READONLY_GROUP=$(echo '{{ query_group | to_json }}' | jq -r '.data.actor.organization.userManagement.authenticationDomains.authenticationDomains.[0].groups.groups.[] | select(.displayName == "{{ client_readonly_group_name }}") | .id')
+        echo $CLIENT_READONLY_GROUP
+      register: client_readonly_group_id
+
+    - name: set client_readonly_group_id fact
+      set_fact:
+        client_readonly_group_id: "{{ client_readonly_group_id.stdout }}"
+    
+    - name: Delete client_management_group_name
+      delegate_to: localhost
+      run_once: true
+      shell: |
+        DELETE_CLIENT_MANAGEMENT_GROUP_RESPONSE=$(curl https://api.newrelic.com/graphql \
+          -H 'Content-Type: application/json' \
+          -H 'API-Key: {{ api_key }}' \
+          --data-binary '{
+                          "query": "mutation {userManagementDeleteGroup(groupOptions: {id: \"{{ client_management_group_id }}\" }) {group {id}}}",
+                          "variables": ""
+                        }'
+        )
+
+    - name: Delete client_readonly_group_name
+      delegate_to: localhost
+      run_once: true
+      shell: |
+        DELETE_CLIENT_READONLY_GROUP_RESPONSE=$(curl https://api.newrelic.com/graphql \
+          -H 'Content-Type: application/json' \
+          -H 'API-Key: {{ api_key }}' \
+          --data-binary '{
+                          "query": "mutation {userManagementDeleteGroup(groupOptions: {id: \"{{ client_readonly_group_id }}\" }) {group {id}}}",
+                          "variables": ""
+                        }'
+        )
+
+    - name: Create client_management_group_name Group
+      delegate_to: localhost
+      run_once: true
+      shell: |
+        CREATE_GROUP_RESPONSE=$(curl https://api.newrelic.com/graphql \
             -H 'Content-Type: application/json' \
             -H 'API-Key: {{api_key}}' \
             --data-binary '{
@@ -90,10 +133,6 @@
           )
           GROUP_ID=$(echo $CREATE_GROUP_RESPONSE | jq -r .data.userManagementCreateGroup.group.id)
           echo $GROUP_ID
-        else
-          GROUP_ID=$(echo $CLIENT_MANAGEMENT_GROUP | jq -r .id)
-          echo $GROUP_ID
-        fi
       register: client_management_group_id
 
     - name: Set Client Management Group Id as Fact
@@ -104,10 +143,6 @@
       delegate_to: localhost
       run_once: true
       shell: |
-        CLIENT_READONLY_GROUP=$(echo '{{ query_group | to_json }}' | jq '.data.actor.organization.userManagement.authenticationDomains.authenticationDomains.[0].groups.groups.[] | select(.displayName == "{{ client_readonly_group_name }}")')
-
-        if [ -z "$CLIENT_READONLY_GROUP" ]; then
-          # create group if does not exist
           CREATE_GROUP_RESPONSE=$(curl https://api.newrelic.com/graphql \
             -H 'Content-Type: application/json' \
             -H 'API-Key: {{api_key}}' \
@@ -118,13 +153,36 @@
           )
           GROUP_ID=$(echo $CREATE_GROUP_RESPONSE | jq -r .data.userManagementCreateGroup.group.id)
           echo $GROUP_ID
-        else
-          GROUP_ID=$(echo $CLIENT_READONLY_GROUP | jq -r .id)
-          echo $GROUP_ID
-        fi
       register: client_readonly_group_id
 
     - name: Set Client ReadOnly Group Id as Fact
       set_fact:
         client_readonly_group_id: "{{ client_readonly_group_id.stdout }}"
 
+    - name: Get FullPlatform BSS User Ids
+      delegate_to: localhost
+      run_once: true
+      shell: |
+        BSS_FULLPLATFORM_USERS=$(echo '{{ query_users | to_json }}' | jq '.data.actor.organization.userManagement.authenticationDomains.authenticationDomains.[0].users.users.[] | select(.email | contains("@bluesageusa.com")) | select(.type.displayName == "Full platform")')
+        BSS_FULLPLATFORM_USERS_IDS=$(echo $BSS_FULLPLATFORM_USERS | jq -s '[.[].id]')
+
+        echo $BSS_FULLPLATFORM_USERS_IDS
+      register: bss_full_platform_user_ids
+    
+    - name: Set Bss Full Platform User Ids as Fact 
+      set_fact:
+        bss_full_platform_user_ids: "{{ bss_full_platform_user_ids.stdout }}"
+
+    - name: Add Full Platform Bluesage Users to client_management_group_name
+      delegate_to: localhost
+      run_once: true
+      shell: |
+        ADD_BSS_FULLPLATFORM_USERS=$(curl https://api.newrelic.com/graphql \
+          -H 'Content-Type: application/json' \
+          -H 'API-Key: {{api_key}}' \
+          --data-binary '{
+                        "query": "mutation {userManagementAddUsersToGroups(addUsersToGroupsOptions: {groupIds: [\"{{client_management_group_id}}\"] userIds: {{ bss_full_platform_user_ids }} }) {groups {displayName id}}}",
+                        "variables": ""
+                      }'
+        )
+        echo $ADD_BSS_FULLPLATFORM_USERS
