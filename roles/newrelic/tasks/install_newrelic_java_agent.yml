@@ -37,8 +37,9 @@
     src: ../../../templates/newrelic/newrelic.yml.j2
     dest: '/opt/bin/{{item}}/newrelic/newrelic.yml'
   vars:
-    app_name: "{{ client }}-{{ env }}-{{ item }}-{{ inventory_hostname | split('_') | last }}"
-    labels: app:{{item}};client:{{client}};env:{{env}}
+    app_name: "{{ client | lower }}-{{ env | lower }}-{{ item | lower }}-{{ inventory_hostname | split('_') | last | lower }}"
+    labels: app:{{item | lower}};client:{{client| lower}};env:{{env | lower}}
+  become: yes
 
 - name: Update Startup Script
   loop: "{{ apps }}"

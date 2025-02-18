@@ -14,7 +14,7 @@
                     }'
     )
 
-    CLIENT_ACCOUNT_METADATA=$(echo $QUERY_ACCOUNT_RESPONSE | jq '.data.actor.organization.accountManagement.managedAccounts.[] | select(.name == "{{client}}")')
+    CLIENT_ACCOUNT_METADATA=$(echo $QUERY_ACCOUNT_RESPONSE | jq '.data.actor.organization.accountManagement.managedAccounts.[] | select(.name == "{{client | lower}}")')
 
     if [ -z "$CLIENT_ACCOUNT_METADATA" ]; then
       echo Account associated with client {{client}} was not found!
