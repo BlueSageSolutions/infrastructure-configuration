@@ -6,6 +6,7 @@
 
 - name: Query New Relic Groups
   delegate_to: localhost
+  run_once: true
   shell: |
     QUERY_GROUP_RESPONSE=$(curl https://api.newrelic.com/graphql \
       -H 'Content-Type: application/json' \
@@ -19,11 +20,13 @@
   register: query_new_relic_groups
 
 - name: Set Query Group as Fact
+  run_once: true
   set_fact:
     query_group: "{{ query_new_relic_groups.stdout | from_json }}"
 
 - name: Create client_management_group_name Group if does not exist
   delegate_to: localhost
+  run_once: true
   shell: |
     CLIENT_MANAGEMENT_GROUP=$(echo '{{ query_group | to_json }}' | jq '.data.actor.organization.userManagement.authenticationDomains.authenticationDomains.[0].groups.groups.[] | select(.displayName == "{{ client_management_group_name }}")')
 
@@ -51,6 +54,7 @@
 
 - name: Add Service Account User to group 
   delegate_to: localhost
+  run_once: true
   shell: |
     CLIENT_MANAGEMENT_GROUP=$(echo '{{ query_group | to_json }}' | jq '.data.actor.organization.userManagement.authenticationDomains.authenticationDomains.[0].groups.groups.[] | select(.displayName == "{{ client_management_group_name }}")')
 
