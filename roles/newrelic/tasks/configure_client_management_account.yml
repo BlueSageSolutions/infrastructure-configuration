@@ -20,6 +20,7 @@
   register: query_new_relic_groups
 
 - name: Set Query Group as Fact
+  delegate_to: localhost
   run_once: true
   set_fact:
     query_group: "{{ query_new_relic_groups.stdout | from_json }}"
