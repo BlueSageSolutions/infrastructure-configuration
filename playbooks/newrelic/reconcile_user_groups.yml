@@ -168,10 +168,24 @@
 
         echo $BSS_FULLPLATFORM_USERS_IDS
       register: bss_full_platform_user_ids
-    
+
     - name: Set Bss Full Platform User Ids as Fact 
       set_fact:
         bss_full_platform_user_ids: "{{ bss_full_platform_user_ids.stdout }}"
+
+    - name: Get Non-FullPlatform BSS User Ids
+      delegate_to: localhost
+      run_once: true
+      shell: |
+        BSS_NONFULLPLATFORM_USERS=$(echo '{{ query_users | to_json }}' | jq '.data.actor.organization.userManagement.authenticationDomains.authenticationDomains.[0].users.users.[] | select(.email | contains("@bluesageusa.com")) | select(.type.displayName != "Full platform")')
+        BSS_NONFULLPLATFORM_USERS_IDS=$(echo $BSS_NONFULLPLATFORM_USERS | jq -s '[.[].id]')
+
+        echo $BSS_NONFULLPLATFORM_USERS_IDS
+      register: bss_nonfull_platform_user_ids
+
+    - name: Set Bss Non Full Platform User Ids as Fact 
+      set_fact:
+        bss_nonfull_platform_user_ids: "{{ bss_nonfull_platform_user_ids.stdout }}"
 
     - name: Add Full Platform Bluesage Users to client_management_group_name
       delegate_to: localhost
@@ -182,6 +196,20 @@
           -H 'API-Key: {{api_key}}' \
           --data-binary '{
                         "query": "mutation {userManagementAddUsersToGroups(addUsersToGroupsOptions: {groupIds: [\"{{client_management_group_id}}\"] userIds: {{ bss_full_platform_user_ids }} }) {groups {displayName id}}}",
+                        "variables": ""
+                      }'
+        )
+        echo $ADD_BSS_FULLPLATFORM_USERS
+
+    - name: Add Non Full Platform Bluesage Users to client_read_only_group_name
+      delegate_to: localhost
+      run_once: true
+      shell: |
+        ADD_BSS_FULLPLATFORM_USERS=$(curl https://api.newrelic.com/graphql \
+          -H 'Content-Type: application/json' \
+          -H 'API-Key: {{api_key}}' \
+          --data-binary '{
+                        "query": "mutation {userManagementAddUsersToGroups(addUsersToGroupsOptions: {groupIds: [\"{{client_readonly_group_id}}\"] userIds: {{ bss_nonfull_platform_user_ids }} }) {groups {displayName id}}}",
                         "variables": ""
                       }'
         )
