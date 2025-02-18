@@ -4,7 +4,7 @@
     java_agent_version: 7.11.1
     output_dir: ./downloads
     zip_file_name: newrelic-java.zip
-    new_relic_apps: ["lendingservices", "lp", "crm", "portal", "admin"]
+    newrelic_apps: ["lendingservices", "lp", "crm", "portal", "admin"]
 
 - name: Download the new Java Agent
   run_once: true
@@ -23,7 +23,7 @@
 
 - name: Copy New Relic Artifacts to Server
   loop: "{{ apps }}"
-  when: item in ["lendingservices", "lp", "crm", "portal", "admin"]
+  when: item in newrelic_apps
   synchronize:
     src: "{{output_dir}}/newrelic"
     dest: '/opt/bin/{{item}}'
@@ -33,7 +33,7 @@
 
 - name: Template NewRelic Config
   loop: "{{ apps }}"
-  when: item in ["lendingservices", "lp", "crm", "portal", "admin"]
+  when: item in newrelic_apps
   template:
     src: ../../../templates/newrelic/newrelic.yml.j2
     dest: '/opt/bin/{{item}}/newrelic/newrelic.yml'
@@ -44,7 +44,7 @@
 
 - name: Update Startup Script
   loop: "{{ apps }}"
-  when: item in ["lendingservices", "lp", "crm", "portal", "admin"]
+  when: item in newrelic_apps
   lineinfile:
     path: '/opt/bin/{{item}}/{{item}}.sh'
     regexp: '^#COMMONOPTS\+\=".*newrelic\.jar"$'

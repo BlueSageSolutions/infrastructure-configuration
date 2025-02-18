@@ -1,4 +1,5 @@
 - name: Set Vars
+  run_once: true
   set_fact:
     authentication_domain_id: 0f4dda55-888e-4f4d-abba-ac7b3417faba
 
@@ -22,8 +23,10 @@
     api_key: "{{ api_key.stdout }}"
   
 - name: configure_client_management_account
+  run_once: true
   import_tasks: configure_client_management_account.yml
 - name: get_license_key
+  run_once: true
   import_tasks: get_license_key.yml
 - name: install_newrelic_java_agent
   import_tasks: install_newrelic_java_agent.yml
