@@ -1,8 +1,3 @@
-- name: Set Varialbes
-  run_once: true
-  set_fact:
-    all_product_admin_role_id: 1254 
-
 - name: Get Client Account Id
   delegate_to: localhost
   run_once: true
@@ -31,19 +26,6 @@
 - name: Set Account Id as Fact
   set_fact:
     account_id: "{{ client_account_id.stdout }}"
-
-- name: Update Account Management Group Permissions
-  delegate_to: localhost
-  run_once: true
-  shell: |
-    UPDATE_PERMISSIONS_RESPONSE=$(curl https://api.newrelic.com/graphql \
-      -H 'Content-Type: application/json' \
-      -H 'API-Key: {{api_key}}' \
-      --data-binary '{
-                        "query": "mutation {authorizationManagementGrantAccess(grantAccessOptions: {groupId: \"{{group_id}}\" accountAccessGrants: {accountId: {{account_id}} roleId: \"{{all_product_admin_role_id}}\"}}) {roles {displayName accountId}}}",
-                        "variables": ""
-                    }'
-    )
 
 - name: Get Date
   delegate_to: localhost

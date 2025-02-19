@@ -1,8 +1,3 @@
-- name: Set Vars
-  run_once: true
-  set_fact:
-    authentication_domain_id: 0f4dda55-888e-4f4d-abba-ac7b3417faba
-
 - name: Get New Relic Service Account Key
   delegate_to: localhost
   run_once: true
@@ -22,9 +17,6 @@
   set_fact:
     api_key: "{{ api_key.stdout }}"
   
-- name: configure_client_management_account
-  run_once: true
-  import_tasks: configure_client_management_account.yml
 - name: get_license_key
   run_once: true
   import_tasks: get_license_key.yml
