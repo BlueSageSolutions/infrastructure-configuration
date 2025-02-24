@@ -1,5 +1,5 @@
 ---
-- name: Reconcile User Groups
+- name: Reconcile BSS User Groups
   hosts: localhost
   gather_facts: no
   vars:
@@ -142,7 +142,7 @@
       set_fact:
         client_management_group_id: "{{ client_management_group_id.stdout }}"
 
-    - name: Create client_readonly_group_name Group if does not exist
+    - name: Create client_readonly_group_name Group
       delegate_to: localhost
       run_once: true
       shell: |
