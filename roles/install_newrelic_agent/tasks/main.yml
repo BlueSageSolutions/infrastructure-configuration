@@ -11,11 +11,11 @@
 
     echo $API_KEY
   register: api_key
-
 - name: Set Api Key as Fact
   run_once: true
   set_fact:
     api_key: "{{ api_key.stdout }}"
+
 - name: update_client_group_permissions
   run_once: true
   import_tasks: update_client_group_permissions.yml

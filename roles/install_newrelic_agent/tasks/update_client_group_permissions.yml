@@ -17,7 +17,13 @@
                       "variables": ""
                     }'
     )
-    CLIENT_GROUP_ID=$(echo $QUERY_GROUP_RESPONSE | jq -r '.data.actor.organization.userManagement.authenticationDomains.authenticationDomains.[0].groups.groups.[] | select(.displayName == "{{client}}Readonly") | .id')
+    CLIENT_GROUP_ID=$(echo $QUERY_GROUP_RESPONSE | jq -r '.data.actor.organization.userManagement.authenticationDomains.authenticationDomains.[0].groups.groups.[] | select(.displayName == "{{client | lower}}Readonly") | .id')
+
+    if [ -z "$CLIENT_GROUP_ID" ]; then
+      echo {{client | lower}}Readonly group was not found!
+      exit 1
+    fi
+
     echo $CLIENT_GROUP_ID
   register: client_group_id
 
@@ -40,10 +46,14 @@
                     }'
     )
 
-    CLIENT_ACCOUNT_ID=$(echo $QUERY_ACCOUNT_RESPONSE | jq '.data.actor.organization.accountManagement.managedAccounts.[] | select(.name == "{{client}}") | .id')
+    CLIENT_ACCOUNT_ID=$(echo $QUERY_ACCOUNT_RESPONSE | jq '.data.actor.organization.accountManagement.managedAccounts.[] | select(.name == "{{client | lower}}") | .id')
+
+    if [ -z "$CLIENT_ACCOUNT_ID" ]; then
+      echo {{client | lower}} account was not found!
+      exit 1
+    fi
 
     echo $CLIENT_ACCOUNT_ID
-
   register: client_account_id
 
 - name: Set Account Id as Fact
