@@ -58,10 +58,18 @@
                       }'
       )
 
-      LICENSE_KEY=$(echo $CREATE_LICENSE_KEY_RESPONSE | jq -r '.data.apiAccessCreateKeys.createdKeys.[0].key')
-      aws ssm put-parameter --name $SSM_PATH --value $LICENSE_KEY --type SecureString  > /dev/null
+      CHECK_CREATED_KEYS=$(echo $CREATE_LICENSE_KEY_RESPONSE | jq -r '.data.apiAccessCreateKeys.createdKeys')
 
-      echo $LICENSE_KEY
+      if [[ "$CHECK_CREATED_KEYS" == null ]]; then
+        ERROR=$(echo $CREATE_LICENSE_KEY_RESPONSE | jq '.data.apiAccessCreateKeys.errors')
+        echo Unable to create key: "$ERROR"
+        exit 1
+      else 
+        LICENSE_KEY=$(echo $CREATE_LICENSE_KEY_RESPONSE | jq -r '.data.apiAccessCreateKeys.createdKeys.[0].key')
+        aws ssm put-parameter --name $SSM_PATH --value $LICENSE_KEY --type SecureString  > /dev/null
+        echo $LICENSE_KEY
+      fi
+
     else
       echo $LICENSE_KEY
     fi
