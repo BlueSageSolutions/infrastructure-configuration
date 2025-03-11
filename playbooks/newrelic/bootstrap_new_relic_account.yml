@@ -4,8 +4,8 @@
   gather_facts: no
   vars:
     authentication_domain_id: 0f4dda55-888e-4f4d-abba-ac7b3417faba
-    client_management_group_name: ClientAccountManagement
-    client_readonly_group_name: ClientAccountReadonly
+    bss_management_admin_group_name: ClientAccountManagement
+    bss_management_readonly_group_name: ClientAccountReadonly
     all_product_admin_role_id: 1254
     read_only_role_id: 1252
   tasks:
@@ -27,6 +27,27 @@
       run_once: true
       set_fact:
         api_key: "{{ api_key.stdout }}"
+
+    - name: Query New Relic Groups
+      delegate_to: localhost
+      run_once: true
+      shell: |
+        QUERY_GROUP_RESPONSE=$(curl https://api.newrelic.com/graphql \
+          -H 'Content-Type: application/json' \
+          -H 'API-Key: {{api_key}}' \
+          --data-binary '{
+                          "query": "{actor {organization {userManagement {authenticationDomains(id: \"{{ authentication_domain_id }}\") {authenticationDomains {groups {groups {displayName id users {users {name id}}}}}}}}}}",
+                          "variables": ""
+                        }'
+        )
+        echo $QUERY_GROUP_RESPONSE
+      register: query_new_relic_groups
+
+    - name: Set Query Group as Fact
+      delegate_to: localhost
+      run_once: true
+      set_fact:
+        query_group: "{{ query_new_relic_groups.stdout | from_json }}"
 
     - name: Get Client Account Id
       delegate_to: localhost
@@ -70,52 +91,65 @@
     - debug:
         var: account_id
 
-    - name: Query New Relic Groups
+    - name: Get Client ReadOnly Group
       delegate_to: localhost
       run_once: true
       shell: |
-        QUERY_GROUP_RESPONSE=$(curl https://api.newrelic.com/graphql \
-          -H 'Content-Type: application/json' \
-          -H 'API-Key: {{api_key}}' \
-          --data-binary '{
-                          "query": "{actor {organization {userManagement {authenticationDomains(id: \"{{ authentication_domain_id }}\") {authenticationDomains {groups {groups {displayName id users {users {name id}}}}}}}}}}",
-                          "variables": ""
-                        }'
-        )
-        echo $QUERY_GROUP_RESPONSE
-      register: query_new_relic_groups
+        CLIENT_READONLYGROUP=$(echo '{{ query_group | to_json }}' | jq -r '.data.actor.organization.userManagement.authenticationDomains.authenticationDomains.[0].groups.groups.[] | select(.displayName == "{{client_code | lower}}Readonly")')
 
-    - name: Set Query Group as Fact
-      delegate_to: localhost
-      run_once: true
-      set_fact:
-        query_group: "{{ query_new_relic_groups.stdout | from_json }}"
+        if [ -z "$CLIENT_READONLYGROUP" ]; then
+          # client read only group not found, create group
+          CREATE_GROUP_RESPONSE=$(curl https://api.newrelic.com/graphql \
+            -H 'Content-Type: application/json' \
+            -H 'API-Key: {{api_key}}' \
+            --data-binary '{
+                            "query": "mutation {userManagementCreateGroup(createGroupOptions: {authenticationDomainId: \"{{ authentication_domain_id }}\" displayName: \"{{client_code | lower}}Readonly\" }) {group {displayName id}}}",
+                            "variables": ""
+                          }'
+          )
+          CLIENT_READONLYGROUP_ID=$(echo $CREATE_GROUP_RESPONSE | jq -r .data.userManagementCreateGroup.group.id)
+          echo $CLIENT_READONLYGROUP_ID
+        else 
+          CLIENT_READONLYGROUP_ID=$(echo $CLIENT_READONLYGROUP | jq -r '.id')
+          echo $CLIENT_READONLYGROUP_ID
+        fi
 
-    - name: Get client_management_group_name group id
-      delegate_to: localhost
-      run_once: true
-      shell: |
-        CLIENT_MANAGEMENT_GROUP=$(echo '{{ query_group | to_json }}' | jq -r '.data.actor.organization.userManagement.authenticationDomains.authenticationDomains.[0].groups.groups.[] | select(.displayName == "{{ client_management_group_name }}") | .id')
-        echo $CLIENT_MANAGEMENT_GROUP
-      register: client_management_group_id
-
-    - name: set client_management_group_id fact
-      set_fact:
-        client_management_group_id: "{{ client_management_group_id.stdout }}"
-
-    - name: Get client_readonly_group_name group id
-      delegate_to: localhost
-      run_once: true
-      shell: |
-        CLIENT_READONLY_GROUP=$(echo '{{ query_group | to_json }}' | jq -r '.data.actor.organization.userManagement.authenticationDomains.authenticationDomains.[0].groups.groups.[] | select(.displayName == "{{ client_readonly_group_name }}") | .id')
-        echo $CLIENT_READONLY_GROUP
       register: client_readonly_group_id
 
-    - name: set client_readonly_group_id fact
+    - name: Set Client Group ID as Fact
+      delegate_to: localhost
+      run_once: true
       set_fact:
         client_readonly_group_id: "{{ client_readonly_group_id.stdout }}"
 
-    - name: Update client_management_group_name Permissions
+    - debug:
+        var: client_readonly_group_id
+
+    - name: Get bss_management_admin_group_name group id
+      delegate_to: localhost
+      run_once: true
+      shell: |
+        CLIENT_MANAGEMENT_GROUP=$(echo '{{ query_group | to_json }}' | jq -r '.data.actor.organization.userManagement.authenticationDomains.authenticationDomains.[0].groups.groups.[] | select(.displayName == "{{ bss_management_admin_group_name }}") | .id')
+        echo $CLIENT_MANAGEMENT_GROUP
+      register: bss_management_admin_group_id
+
+    - name: set bss_management_admin_group_id fact
+      set_fact:
+        bss_management_admin_group_id: "{{ bss_management_admin_group_id.stdout }}"
+
+    - name: Get bss_management_readonly_group_name group id
+      delegate_to: localhost
+      run_once: true
+      shell: |
+        CLIENT_READONLY_GROUP=$(echo '{{ query_group | to_json }}' | jq -r '.data.actor.organization.userManagement.authenticationDomains.authenticationDomains.[0].groups.groups.[] | select(.displayName == "{{ bss_management_readonly_group_name }}") | .id')
+        echo $CLIENT_READONLY_GROUP
+      register: bss_management_readonly_group_id
+
+    - name: set bss_management_readonly_group_id fact
+      set_fact:
+        bss_management_readonly_group_id: "{{ bss_management_readonly_group_id.stdout }}"
+
+    - name: Update bss_management_admin_group_name Permissions
       delegate_to: localhost
       run_once: true
       shell: |
@@ -123,12 +157,25 @@
           -H 'Content-Type: application/json' \
           -H 'API-Key: {{api_key}}' \
           --data-binary '{
-                            "query": "mutation {authorizationManagementGrantAccess(grantAccessOptions: {groupId: \"{{client_management_group_id}}\" accountAccessGrants: {accountId: {{ account_id }} roleId: \"{{all_product_admin_role_id}}\"}}) {roles {displayName accountId}}}",
+                            "query": "mutation {authorizationManagementGrantAccess(grantAccessOptions: {groupId: \"{{bss_management_admin_group_id}}\" accountAccessGrants: {accountId: {{ account_id }} roleId: \"{{all_product_admin_role_id}}\"}}) {roles {displayName accountId}}}",
                             "variables": ""
                         }'
         )
 
-    - name: Update client_readonly_group_name Permissions
+    - name: Update bss_management_readonly_group Permissions
+      delegate_to: localhost
+      run_once: true
+      shell: |
+        UPDATE_PERMISSIONS_RESPONSE=$(curl https://api.newrelic.com/graphql \
+          -H 'Content-Type: application/json' \
+          -H 'API-Key: {{api_key}}' \
+          --data-binary '{
+                            "query": "mutation {authorizationManagementGrantAccess(grantAccessOptions: {groupId: \"{{bss_management_readonly_group_id}}\" accountAccessGrants: {accountId: {{ account_id }} roleId: \"{{read_only_role_id}}\"}}) {roles {displayName accountId}}}",
+                            "variables": ""
+                        }'
+        )
+
+    - name: Update client read only group Permissions
       delegate_to: localhost
       run_once: true
       shell: |
