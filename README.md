@@ -59,6 +59,13 @@ Ensure you are in a virtual environment before running the following command:
 ansible-playbook -i inventory/<path to host file> setup.yml -u ubuntu
 ```
 
+#### New Relic
+New relic account must be bootstrapped using the following command:
+
+```
+ansible-playbook playbooks/newrelic/bootstrap_new_relic_account.yml -e "client_code=<client code>"
+```
+
 ## Refactor/Notes
 
 - ansible playbook should read secrets and credentials from aws store at runtime so passwords are not stored in host yaml files on machines. For example, instead of reading db_pwd and writing to .yml file, the ansible playbook should read that password from aws ssm at runtime
