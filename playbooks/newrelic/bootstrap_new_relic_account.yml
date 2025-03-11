@@ -43,7 +43,21 @@
 
         CLIENT_ACCOUNT_METADATA=$(echo $QUERY_ACCOUNT_RESPONSE | jq '.data.actor.organization.accountManagement.managedAccounts.[] | select(.name == "{{ client_code | lower }}")')
 
-        echo $(echo $CLIENT_ACCOUNT_METADATA | jq -r '.id')
+        if [ -z "$CLIENT_ACCOUNT_METADATA" ]; then
+          # Account not found, create account
+          CREATE_ACCOUNT_RESPONSE=$(curl https://api.newrelic.com/graphql \
+            -H 'Content-Type: application/json' \
+            -H 'API-Key: {{ api_key }}' \
+            --data-binary '{
+                              "query": "mutation {accountManagementCreateAccount(managedAccount: { name: \"{{ client_code }}\", regionCode: \"us01\" }) {managedAccount {id name regionCode}}}",
+                              "variables": ""
+                          }'
+                    
+          )
+          echo $(echo $CREATE_ACCOUNT_RESPONSE | jq -r '.data.accountManagementCreateAccount.managedAccount.id')
+        else 
+          echo $(echo $CLIENT_ACCOUNT_METADATA | jq -r '.id')
+        fi
         
       register: account_id
 
@@ -51,7 +65,7 @@
       delegate_to: localhost
       run_once: true
       set_fact:
-        account_id: "{{ account_id.stdout | from_json }}"
+        account_id: "{{ account_id.stdout }}"
     
     - debug:
         var: account_id

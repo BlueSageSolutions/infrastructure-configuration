@@ -16,9 +16,6 @@
   set_fact:
     api_key: "{{ api_key.stdout }}"
 
-- name: update_client_group_permissions
-  run_once: true
-  import_tasks: update_client_group_permissions.yml
 - name: get_license_key
   run_once: true
   import_tasks: get_license_key.yml
