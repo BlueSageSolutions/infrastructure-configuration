@@ -60,11 +60,18 @@ ansible-playbook -i inventory/<path to host file> setup.yml -u ubuntu
 ```
 
 #### New Relic
-New relic account must be bootstrapped using the following command:
-
+New relic account, and client read only group must be created using the bootstrap playbook:
 ```
 ansible-playbook playbooks/newrelic/bootstrap_new_relic_account.yml -e "client_code=<client code>"
 ```
+This will also add the account to the `ClientAccountManagement` group which allows for the new relic service user to create resources via the new_relic terraform module
+
+Bss groups are created and managed by the reconcile bss user groups playbook:
+```
+ansible-playbook playbooks/newrelic/reconcile_bss_user_groups.yml
+```
+
+This adds all bss full platform users to the `ClientAccountManagement` group, and all bss basic users to the `ClientAccountReadonly` group
 
 ## Refactor/Notes
 
