@@ -14,7 +14,7 @@ We use ansible playbooks to update our application configurations on remote host
 
 ## Setup 
 
-This project uses [poetry](https://python-poetry.org/) as a python package manager.
+This project uses [poetry](https://python-poetry.org/docs/) as a python package manager.
 
 ### Poetry setup
 
