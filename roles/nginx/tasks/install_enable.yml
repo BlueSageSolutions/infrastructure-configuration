@@ -1,0 +1,34 @@
+- name: update
+  shell: |
+    apt update -y
+
+# - name: Create nginx keyring
+#   shell: |
+#     curl https://nginx.org/keys/nginx_signing.key | gpg --dearmor \
+#       | sudo tee /usr/share/keyrings/nginx-archive-keyring.gpg >/dev/null
+#     echo "deb [signed-by=/usr/share/keyrings/nginx-archive-keyring.gpg] \
+#       http://nginx.org/packages/ubuntu `lsb_release -cs` nginx" \ 
+#       | sudo tee /etc/apt/sources.list.d/nginx.list
+#     echo "Package: *\nPin: origin nginx.org\nPin: release o=nginx\nPin-Priority: 900\n" \
+#       | sudo tee /etc/apt/preferences.d/99-nginx
+#   args:
+#     creates: /usr/share/keyrings/nginx-archive-keyring.gpg
+
+- name: ensure nginx is at the latest version
+  shell: |
+    apt install -y nginx
+  when: version == 'latest'
+
+- name: install certain version of nginx
+  shell: |
+    apt install -y nginx={{ version }}
+  when: version != 'latest'
+
+# ensure line in nginx.conf file
+- name: update /etc/nginx/nginx.conf
+  lineinfile:
+    path: /etc/nginx/nginx.conf
+    line: "    include /etc/nginx/sites-enabled/*;"
+    insertafter: '    include /etc/nginx/conf\.d/\*\.conf;'
+    # insertbefore: '}'
+    # state: absent
