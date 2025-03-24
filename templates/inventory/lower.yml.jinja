@@ -1,13 +1,13 @@
 {%for env in environments %}
 {{ client_code }}_{{ env }}:
   hosts:
-{%- set instances = instances | selectattr("env", "equalto", env) -%}
-{%- for instance in instances -%}
+{%- set instances = instances | selectattr("env", "equalto", env) %}
+{%- for instance in instances %}
     {{ instance.get_name().replace('-', '_') }}:
       ansible_host: {{ instance.get_ip_address() }}
       apps: {{ instance.get_apps() }}
-{%- endfor %}
-{%- endfor %}
+{% endfor %}
+{% endfor %}
 
 {{ client_code }}_lower:
   children:

@@ -1,14 +1,13 @@
 {%for env in environments %}
 {{ client_code }}_{{ env }}:
   hosts:
-{%- set instances = instances | selectattr("env", "equalto", env) -%}
-{%- for instance in instances -%}
-{% set apps = instance.get_apps() %}
+{%- set instances = instances | selectattr("env", "equalto", env) %}
+{%- for instance in instances %}
     {{ instance.get_name().replace('-', '_') }}:
       ansible_host: {{ instance.get_ip_address() }}
-      apps: {{ apps }}
-{%- endfor %}
-{%- endfor %}
+      apps: {{ instance.get_apps() }}
+{% endfor %}
+{% endfor %}
 
   vars:
     ansible_ssh_private_key_file: {{ ssh_private_key_file_path }}
