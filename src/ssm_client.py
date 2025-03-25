@@ -91,19 +91,9 @@ class NginxPortMapping(BaseModel):
                 mappings[port] = [app]
 
         return mappings
-
-    # @property
-    # def env(self) -> str:
-    #     return self.__process_tag(key="environment")
-
     @property
     def app_name(self) -> str:
         return self.Name.split('/')[-1].split('-')[0]
-
-    # def __process_tag(self, key: str):
-    #     for tag in self._tags:
-    #         if tag.get("Key") == key:
-    #             return tag.get("Value")
 
     @staticmethod
     def get_parameter_path(client_code: str, env: str, app: str):
