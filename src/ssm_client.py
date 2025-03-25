@@ -18,16 +18,11 @@ class SsmClient:
         )
 
         return GetParametersResponse(**response)
-    
-    def get_resource_tags(self, resource_id: str) -> GetResourceTagsResponse:
-        response = self.ssm_client.list_tags_for_resource(ResourceType="Parameter", ResourceId=resource_id)
-        
-        return GetResourceTagsResponse(**response)
-    
+
     def update_client_profile(self, profile_name: str):
         session = Session(profile_name=profile_name)
         ssm_client = session.client("ssm")
-        self.ssm_client = ssm_client        
+        self.ssm_client = ssm_client
 
     @staticmethod
     def new(profile_name: str) -> SsmClient:
@@ -47,7 +42,7 @@ class Parameter(BaseModel):
 
     def get_value(self) -> str:
         return self.Value
-    
+
     def get_name(self) -> str:
         return self.Name
 
@@ -62,7 +57,7 @@ class RdsCreds(BaseModel):
 
     def get_password(self) -> str:
         return self.password
-    
+
     @property
     def env(self) -> str:
         return self.username.split("_")[-1]
@@ -71,10 +66,13 @@ class RdsCreds(BaseModel):
     def get_parameter_path(client_code: str, env: str):
         return f"/secrets/{client_code}/{env}/database/application-user"
 
+
 class GetResourceTagsResponse(BaseModel):
     TagList: List[Dict[str, str]]
 
+
 class NginxPortMapping(BaseModel):
+    Name: str
     Value: str
     _tags: List[Dict[str, str]]
     _env: str
@@ -86,27 +84,27 @@ class NginxPortMapping(BaseModel):
         mappings: Dict[int, List[str]] = {}
         values: Dict[str, int] = json.loads(self.Value)
 
-        for (app, port) in values.items():
+        for app, port in values.items():
             if mappings.get(port):
                 mappings[port].append(app)
-            else: 
+            else:
                 mappings[port] = [app]
 
         return mappings
 
+    # @property
+    # def env(self) -> str:
+    #     return self.__process_tag(key="environment")
+
     @property
-    def env(self) -> str:
-        return self.__process_tag(key="environment")
-    
-    @property
-    def instance_name(self) -> str:
-        return self.__process_tag(key="instance_name")
-            
-    def __process_tag(self, key: str):
-        for tag in self._tags:
-            if tag.get("Key") == key:
-                return tag.get("Value")
-    
+    def app_name(self) -> str:
+        return self.Name.split('/')[-1].split('-')[0]
+
+    # def __process_tag(self, key: str):
+    #     for tag in self._tags:
+    #         if tag.get("Key") == key:
+    #             return tag.get("Value")
+
     @staticmethod
-    def get_parameter_path(client_code: str, env: str, server_name: str):
-        return f"/nginx/{client_code}/{env}/{server_name}/ports"
+    def get_parameter_path(client_code: str, env: str, app: str):
+        return f"/secrets/{client_code}/{env}/nginx/{app}-ports"
