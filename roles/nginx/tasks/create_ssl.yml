@@ -27,3 +27,36 @@
 - name: reset fact to create /etc/nginx/sites-available/ssl file
   set_fact:
     app_locations: ''
+
+
+## LION ##
+- name: Set lion location name
+  set_fact:
+    lion_location: "{{ nginx[port].lion_locations_name | default(lion_locations_name) }}"
+
+- name: Set lion cub artifact location on server
+  set_fact:
+    lion_artifact_location: "{{ nginx[port].lion_cub_artifact_location | default(lion_cub_artifact_location ) }}"
+
+- name: template - lion-locations files
+  template:
+    src: "templates/lion-locations.j2"
+    dest: "/etc/nginx/{{ lion_location }}"
+  when: nginx[port].nginx_apps == ["lion"]
+  become: true
+
+- name: Insert/Update /etc/nginx/sites-available/ssl file for lion
+  blockinfile:
+    path: /etc/nginx/sites-available/ssl
+    create: true
+    marker: "# {mark} {{ port }}"
+    block: |
+      server {
+          listen {{ port }} ssl;
+          server_name {{ server_name }};
+          include /etc/nginx/common-settings;
+          include /etc/nginx/global-nginx-settings;
+          include /etc/nginx/{{ lion_location }};
+      }
+  when: nginx[port].nginx_apps == ["lion"]
+  become: true
