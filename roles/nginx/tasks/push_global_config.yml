@@ -1,0 +1,11 @@
+- name: upload common nginx files 
+  import_tasks: ../../../tasks/upload_files.yml
+  vars:
+    files:
+      common-security-headers: /etc/nginx/
+      common-settings: /etc/nginx/
+
+- name: global-nginx-settings
+  template:
+    src: templates/global-nginx-settings.j2
+    dest: /etc/nginx/global-nginx-settings

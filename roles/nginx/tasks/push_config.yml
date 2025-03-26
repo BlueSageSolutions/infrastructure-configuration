@@ -1,17 +1,3 @@
-- name: upload common nginx files 
-  import_tasks: ../../../tasks/upload_files.yml
-  vars:
-    files:
-      common-security-headers: /etc/nginx/
-      common-settings: /etc/nginx/
-  become: true
-
-- name: global-nginx-settings
-  template:
-    src: templates/global-nginx-settings.j2
-    dest: /etc/nginx/global-nginx-settings
-  become: true
-
 - name: template - app-locations files
   template:
     src: "templates/{{ app_template }}-locations.j2"
