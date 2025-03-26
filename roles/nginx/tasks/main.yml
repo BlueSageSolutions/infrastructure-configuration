@@ -22,3 +22,9 @@
   vars:
     port: "{{ item }}"
   loop: "{{ nginx.keys() | list }}"
+
+- name: restart nginx
+  service: 
+    name: nginx
+    state: restarted
+    enabled: yes
