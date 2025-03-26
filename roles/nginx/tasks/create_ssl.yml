@@ -1,0 +1,29 @@
+- name: Set fact to create /etc/nginx/sites-available/ssl file
+  set_fact:
+    app_locations: "{{ app_locations | default('') + \n
+      '    include /etc/nginx/' + app_template + '-locations;\n'
+      }}"
+  when: app_template in app_templates
+  loop: "{{ nginx[port].nginx_apps }}"
+  loop_control:
+    loop_var: app_template
+
+- name: Insert/Update /etc/nginx/sites-available/ssl file
+  blockinfile:
+    path: /etc/nginx/sites-available/ssl
+    create: true
+    marker: "# {mark} {{ port }}"
+    block: |
+      server {
+          listen {{ port }} ssl;
+          server_name {{ server_name }};
+          include /etc/nginx/common-settings;
+          include /etc/nginx/global-nginx-settings;
+      {{ app_locations }}
+      }
+  when: nginx[port].nginx_apps is subset(app_templates)
+  become: true
+
+- name: reset fact to create /etc/nginx/sites-available/ssl file
+  set_fact:
+    app_locations: ''
