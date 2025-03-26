@@ -1,0 +1,7 @@
+- name: upload files
+  vars:
+    files_dicts: "{{ files | dict2items(key_name='file', value_name='path') }}"
+  copy:
+    src: "{{ item.file }}"
+    dest: "{{ item.path }}"
+  loop: "{{ files_dicts }}"

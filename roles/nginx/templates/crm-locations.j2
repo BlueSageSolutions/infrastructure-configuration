@@ -1,0 +1,71 @@
+{% set loc_context  = ""  if root_context else "crm" %}
+{% set port_context = ""  if root_context else "/crm" %}
+location /{{ loc_context }} {
+{% if root_context %}
+    if (-f /usr/share/nginx/html/maintenance_crm) { return 503; }
+{% endif -%}
+    if ($request_method = 'OPTIONS') {
+
+        add_header 'Access-Control-Allow-Origin' $cors_origin;
+
+        #
+        # Om nom nom cookies
+        #
+
+        add_header 'Access-Control-Allow-Credentials' $cors_cred;
+        add_header 'Access-Control-Allow-Methods' $cors_method;
+
+        #
+        # Custom headers and headers various browsers *should* be OK with but aren                                                                                                                              't
+        #
+
+        add_header 'Access-Control-Allow-Headers' $cors_header;
+
+        #
+        # Tell client that this pre-flight info is valid for 20 days
+        #
+
+        add_header 'Access-Control-Max-Age' 1728000;
+        add_header 'Content-Type' 'text/plain charset=UTF-8';
+        add_header 'Content-Length' 0;
+
+        return 204;
+    }
+
+    if ($request_method = 'POST') {
+
+        add_header 'Access-Control-Allow-Origin' $cors_origin;
+        add_header 'Access-Control-Allow-Credentials' $cors_cred;
+        add_header 'Access-Control-Allow-Methods' $cors_method;
+        add_header 'Access-Control-Allow-Headers' $cors_header;
+
+    }
+
+   if ($request_method = 'GET') {
+
+      add_header 'Access-Control-Allow-Origin' $cors_origin;
+      add_header 'Access-Control-Allow-Credentials' $cors_cred;
+      add_header 'Access-Control-Allow-Methods' $cors_method;
+      add_header 'Access-Control-Allow-Headers' $cors_header;
+
+    }
+
+    proxy_connect_timeout      600;
+    proxy_send_timeout         600;
+    proxy_read_timeout         600;
+    send_timeout               600;
+    proxy_set_header Host $http_host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_redirect http:// $scheme://;
+    proxy_pass http://localhost:8097{{ port_context }};
+
+    include /etc/nginx/common-security-headers;
+
+}
+
+{% if root_context %}
+error_page 503 /maintenance.html;
+location = /maintenance.html {
+    root /usr/share/nginx/html/;
+}
+{% endif -%}

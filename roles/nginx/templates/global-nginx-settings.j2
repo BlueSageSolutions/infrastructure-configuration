@@ -1,0 +1,11 @@
+# prevent search engines from crawling
+location /robots.txt {
+    add_header Content-Type text/plain;
+    return 200 "User-agent: *\nDisallow: /\n";
+}
+
+location ~ \.(aspx|php)$ {
+    return 444;
+    access_log off;
+    log_not_found off;
+}

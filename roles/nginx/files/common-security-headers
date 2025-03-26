@@ -1,0 +1,32 @@
+### common-security-headers ###
+### ref: https://webdock.io/en/docs/how-guides/security-guides/how-to-configure-security-headers-in-nginx-and-apache
+### ref: https://docs.report-uri.com
+
+# HSTS: This will prevents web browsers from accessing web servers over non-HTTPS connections.
+add_header Strict-Transport-Security 'max-age=31536000; includeSubDomains; preload;' always;
+
+# SAMEORIGIN : iframe can be used only by someone on the same origin.
+add_header X-Frame-Options SAMEORIGIN;
+
+# Browser Sniffing Protection
+add_header X-Content-Type-Options nosniff;
+
+# Cross Site Scripting defend against Cross-Site Scripting attacks
+add_header X-XSS-Protection "1; mode=block";
+
+# set cookie flag as HTTPOnly and Secure
+add_header Set-Cookie "Path=/; HttpOnly; Secure";
+
+# report-uri.com api report groups defined
+# default set to report only url https://cf646d6509cf4ef318ae417acff363ff.report-uri.com/a/d/g
+# for wizard change url to https://cf646d6509cf4ef318ae417acff363ff.report-uri.com/a/d/g/wizard
+add_header Report-To "{\"group\":\"default\",\"max_age\":31536000,\"endpoints\":[{\"url\":\"https://cf646d6509cf4ef318ae417acff363ff.report-uri.com/a/d/g\"}],\"include_subdomains\":true}";
+
+# enforced allow everything csp policy
+add_header Content-Security-Policy "upgrade-insecure-requests; default-src * data: blob: filesystem: about: ws: wss: 'unsafe-inline' 'unsafe-eval'; script-src * data: blob: 'unsafe-inline' 'unsafe-eval'; connect-src * data: blob: 'unsafe-inline'; img-src * data: blob: 'unsafe-inline'; frame-src * data: blob:; style-src * data: blob: 'unsafe-inline'; font-src * data: blob: 'unsafe-inline'; object-src *;" always;
+
+# report-uri.com reports sent via report-uri (depreciated in some browsers) and report-to (api)
+# for wizard change report-uri to https://cf646d6509cf4ef318ae417acff363ff.report-uri.com/r/d/csp/wizard and report-to wizard
+# for report-only set report-uri to https://cf646d6509cf4ef318ae417acff363ff.report-uri.com/r/d/csp/reportOnly and report-to default
+# commented out by default
+#add_header Content-Security-Policy-Report-Only "default-src 'none'; script-src 'none'; script-src-elem 'none'; script-src-attr 'none'; style-src 'none'; style-src-elem 'none'; style-src-attr 'none'; img-src 'none'; font-src 'none'; connect-src 'none'; media-src 'none'; object-src 'none'; prefetch-src 'none'; child-src 'none'; frame-src 'none'; worker-src 'none'; frame-ancestors 'none'; form-action 'none'; upgrade-insecure-requests; block-all-mixed-content; disown-opener; report-uri https://cf646d6509cf4ef318ae417acff363ff.report-uri.com/r/d/csp/reportOnly; report-to default;" always;

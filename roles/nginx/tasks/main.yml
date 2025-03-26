@@ -1,3 +1,14 @@
+- name: set variables
+  run_once: true
+  set_fact:
+    app_templates: ["lendingservices", "lp", "crm", "portal", "admin", "hydra", "lom", "sfa", "hip", "shuttle"]
+
 - name: install and enable nginx
   import_tasks: install_enable.yml
   become: yes
+
+- name: push config files
+  include_tasks: push_config.yml
+  # vars:
+  #   port: "{{ item }}"
+  # loop: "{{ nginx.keys() | list }}"

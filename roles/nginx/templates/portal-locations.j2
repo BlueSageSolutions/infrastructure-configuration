@@ -1,0 +1,26 @@
+{% set loc_context  = ""  if root_context else "portal" %}
+{% set port_context = ""  if root_context else "/portal" %}
+location /{{ loc_context }} {
+{% if root_context %}
+    if (-f /usr/share/nginx/html/maintenance_portal) { return 503; }
+{% endif -%}
+    proxy_connect_timeout      600;
+    proxy_send_timeout         600;
+    proxy_read_timeout         600;
+    send_timeout               600;
+    proxy_set_header Host $http_host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_redirect http:// $scheme://;
+    add_header 'Content-Security-Policy' 'upgrade-insecure-requests';
+    proxy_pass http://localhost:8095{{ port_context }};
+
+    include /etc/nginx/common-security-headers;
+}
+
+{% if root_context %}
+error_page 503 /maintenance.html;
+location = /maintenance.html {
+    root /usr/share/nginx/html/;
+}
+{% endif -%}
+

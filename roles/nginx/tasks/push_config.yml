@@ -1,0 +1,18 @@
+- name: upload common nginx files 
+  import_tasks: ../../tasks/upload_files.yml
+  vars:
+    files:
+      common-security-headers: /etc/nginx/
+      common-settings: /etc/nginx/
+
+- name: global-nginx-settings
+  template:
+    src: templates/global-nginx-settings.j2
+    dest: /etc/nginx/global-nginx-settings
+
+- name: template - app-locations files
+  template:
+    src: "templates/{{ item }}-locations.j2"
+    dest: /etc/nginx/{{ item }}-locations
+  when: item in app_templates
+  loop: "{{ nginx[port].nginx_apps }}"

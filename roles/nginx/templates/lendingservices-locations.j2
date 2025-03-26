@@ -1,0 +1,5 @@
+location /lendingservices {
+    proxy_pass http://localhost:8099/lendingservices;
+    proxy_send_timeout 600;
+    proxy_read_timeout 600;
+}

@@ -4,3 +4,4 @@ inventory/prod/*.yml
 inventory/lower/*.yml
 downloads/*
 !.gitkeep
+*.DS_Store

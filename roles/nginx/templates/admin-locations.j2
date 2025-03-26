@@ -1,0 +1,23 @@
+{% set loc_context  = ""  if root_context else "admin" %}
+{% set port_context = ""  if root_context else "/admin" %}
+location /{{ loc_context }} {
+{% if root_context %}
+    if (-f /usr/share/nginx/html/maintenance_admin) { return 503; }
+{% endif -%}
+    proxy_set_header Host $http_host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_redirect http:// $scheme://;
+    add_header 'Content-Security-Policy' 'upgrade-insecure-requests';
+    proxy_pass http://localhost:8093{{ port_context }};
+    proxy_read_timeout  600;
+    proxy_send_timeout  600;
+
+    include /etc/nginx/common-security-headers;
+}
+
+{% if root_context %}
+error_page 503 /maintenance.html;
+location = /maintenance.html {
+    root /usr/share/nginx/html/;
+}
+{% endif -%}
