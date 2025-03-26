@@ -1,1 +1,5 @@
 version: 1.26.*
+root_context: false
+server_name: "_" # OR "default_server"...
+lion_cub_artifact_location: ""
+lion_locations_name: "lion-locations"

@@ -13,7 +13,7 @@
 - name: update
   shell: |
     apt update -y
-    apt install -y nginx=1.26.*
+    apt install -y nginx={{ version }}
 
 # ensure line in nginx.conf file
 - name: update /etc/nginx/nginx.conf

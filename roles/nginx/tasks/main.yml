@@ -9,6 +9,6 @@
 
 - name: push config files
   include_tasks: push_config.yml
-  # vars:
-  #   port: "{{ item }}"
-  # loop: "{{ nginx.keys() | list }}"
+  vars:
+    port: "{{ item }}"
+  loop: "{{ nginx.keys() | list }}"

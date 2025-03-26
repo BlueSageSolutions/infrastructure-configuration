@@ -2,6 +2,8 @@
   vars:
     files_dicts: "{{ files | dict2items(key_name='file', value_name='path') }}"
   copy:
-    src: "{{ item.file }}"
-    dest: "{{ item.path }}"
+    src: "{{ file_dict.file }}"
+    dest: "{{ file_dict.path }}"
   loop: "{{ files_dicts }}"
+  loop_control:
+    loop_var: file_dict
