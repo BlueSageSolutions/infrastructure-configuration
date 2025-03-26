@@ -4,7 +4,7 @@ from invoke import task
 from src import Config
 from src.ec2_client import Ec2Client, Ec2ClientResponse, Instance
 from src.templater import Templater
-from src.ssm_client import SsmClient, GetParametersResponse, GetResourceTagsResponse, NginxPortMapping
+from src.ssm_client import SsmClient, GetParametersResponse, NginxPortMapping
 from src.inventory_group import update_inventory_group
 
 
@@ -14,7 +14,6 @@ def inventory_template(
     envs: str,
     client_code: str,
     client_account_aws_profile: str = "it-devops-bss",
-    bss_devops_account_aws_profile: str = "it-devops-bss-devops",
 ):
     """
     Templates out ansible inventory yaml configuration file
@@ -23,15 +22,13 @@ def inventory_template(
         envs: A comma delinatied list of environments. Cannot include spaces. Ex: dev,qa,uat,foo,bar
         client_code: client code corresponding to client infrasture you want to configure using ansible
         client_account_aws_profile: name of aws profile that points to aws client account 
-        bss_devops_account_aws_profile: name of aws profile that points to aws bss-devops account 
     """
     config = Config.new(environments=envs, client_code=client_code)
 
     ec2_client: Ec2Client = Ec2Client.new(profile_name=client_account_aws_profile)
-    ssm_client: SsmClient = SsmClient.new(profile_name=bss_devops_account_aws_profile)
+    ssm_client: SsmClient = SsmClient.new(profile_name=client_account_aws_profile)
 
     instances: List[Instance] = get_ec2_instances(ec2_client=ec2_client, config=config)
-    ssm_client.update_client_profile(profile_name=client_account_aws_profile)
     nginx_port_mappings: List[NginxPortMapping] = get_nginx_port_mapping(ssm_client=ssm_client, config=config, instances=instances)
 
     template_data = {
@@ -44,6 +41,7 @@ def inventory_template(
     }
 
     validate_template_vars(template_data)
+    
     templater: Templater = Templater.new(config=config)
     rendered_template = templater.render(template_data=template_data)
     templater.write_template(
@@ -59,16 +57,6 @@ def get_ec2_instances(ec2_client: Ec2Client, config: Config) -> List[Instance]:
     instances: List[Instance] = ec2_response.get_instances()
 
     return instances
-
-def validate_template_vars(vars: Dict):
-
-    if len(vars.get("instances")) == 0:
-        print("List of EC2 instances is empty")
-        sys.exit()
-    elif len(vars.get("nginx_port_mappings")) == 0:
-        print("List of nginx port mappings is empty")
-        sys.exit()
-
 
 def get_nginx_port_mapping(ssm_client: SsmClient, config: Config, instances: List[Instance]) -> List[NginxPortMapping]:
     client_code = config.get_client_code()
@@ -87,3 +75,12 @@ def get_nginx_port_mapping(ssm_client: SsmClient, config: Config, instances: Lis
     nginx_port_mappings: List[NginxPortMapping] = [NginxPortMapping(**parameter.model_dump()) for parameter in ssm_response.Parameters]
 
     return nginx_port_mappings
+
+def validate_template_vars(vars: Dict):
+
+    if len(vars.get("instances")) == 0:
+        print("List of EC2 instances is empty")
+        sys.exit()
+    elif len(vars.get("nginx_port_mappings")) == 0:
+        print("List of nginx port mappings is empty")
+        sys.exit()
