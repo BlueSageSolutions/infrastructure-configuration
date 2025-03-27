@@ -1,0 +1,11 @@
+[Unit]
+Description=Start Lending ADMIN server
+After=network.target
+
+[Service]
+ExecStart=/opt/bin/admin/admin.sh
+KillMode=mixed
+KillSignal=SIGKILL
+
+[Install]
+WantedBy=multi-user.target

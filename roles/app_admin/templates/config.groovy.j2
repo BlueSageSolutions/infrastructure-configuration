@@ -1,0 +1,23 @@
+def dbURL = "jdbc:mysql://{{ cluster_path }}/{{ db_schema }}?noAccessToProcedureBodies=true&useSSL=false&zeroDateTimeBehavior=convertToNull"
+def dbUser = "{{ db_user }}"
+def dbPwd = "{{ db_pwd }}"
+
+multipleLogins.allow = true
+
+dataSource {
+    url = dbURL
+    username = dbUser
+    password = dbPwd
+}
+
+lendingComponents.rules.filename = "latest"
+lendingComponents.datasource.url = dbURL
+lendingComponents.datasource.username = dbUser
+lendingComponents.datasource.password = dbPwd
+
+docpath.host="docpath.bluesageusa.com"
+docpath.username="ubuntu"
+docpath.keyfile="/root/.ssh/id_rsa"
+docpath.sendToDir="/home/docpath/4.1/Controller/scan/data1"
+docpath.receiveFromDir="/home/docpath/4.1/Controller/output/"
+docpath.staticFileDir="/home/docpath/static/"

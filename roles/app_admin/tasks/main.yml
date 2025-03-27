@@ -1,0 +1,21 @@
+- name: create application directory
+  file:
+    path: /opt/bin/admin
+    state: directory
+    mode: 0777
+
+- name: create application tmp directory
+  file:
+    path: /opt/bin/admin/tmp
+    state: directory
+    mode: 0777
+
+# main files are uploaded unless {files} is provided at a higher level
+- name: upload admin files 
+  import_tasks: ../../../tasks/upload_files.yml
+  vars:
+    files:
+      admin.service: /lib/systemd/system/
+
+- name: push config files
+  import_tasks: push_config.yml
