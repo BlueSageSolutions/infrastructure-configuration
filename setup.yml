@@ -8,10 +8,15 @@
     apps: "{{ hostvars[inventory_hostname].apps }}"
 
   tasks:
-    # - name: Install New Relic Java Agent
-    #   include_role:
-    #     name: install_newrelic_agent
+    - name: Update apt
+      shell: sudo apt update
+
+    - name: Install packages
+      expect:
+        command: sudo apt install curl gnupg2 ca-certificates lsb-release ubuntu-keyring
+        responses:
+          "Do you want to continue?": "Y"
     
-    - name: Nginx
-      include_role:
-        name: nginx
+    # - name: Nginx
+    #   include_role:
+    #     name: nginx
