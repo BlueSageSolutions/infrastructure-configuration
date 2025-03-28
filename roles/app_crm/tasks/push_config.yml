@@ -8,3 +8,13 @@
   template:
     src: templates/config.groovy.j2
     dest: /opt/bin/crm/config.groovy
+
+- name: custom timezone - config.groovy
+  lineinfile:
+    path: /opt/bin/crm/config.groovy
+    line: "{{ item.line }}"
+  when: config_groovy_timezone is defined
+  loop:
+    - line: "\n"
+    - line: dateTime.displayTimeZone = "{{ config_groovy_timezone }}"
+    - line: dateTime.pricingTimeZone = "{{ config_groovy_timezone }}"
