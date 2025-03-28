@@ -1,2 +1,1 @@
-db_schema: "{{ client }}_{{ env }}"
-db_user: "{{ client }}_{{ env }}"
+root_context: false

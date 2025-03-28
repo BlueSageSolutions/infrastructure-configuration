@@ -1,6 +1,6 @@
-def dbURL = "jdbc:mysql://{{ cluster_path }}/{{ db_schema }}?noAccessToProcedureBodies=true&useSSL=false&zeroDateTimeBehavior=convertToNull"
-def dbUser = "{{ db_user }}"
-def dbPwd = "{{ db_pwd }}"
+def dbURL = "jdbc:mysql://{{ database.hostname }}/{{ database_schema }}?noAccessToProcedureBodies=true&useSSL=false&zeroDateTimeBehavior=convertToNull"
+def dbUser = "{{ database.username }}"
+def dbPwd = "{{ database.password }}"
 
 multipleLogins.allow = true
 

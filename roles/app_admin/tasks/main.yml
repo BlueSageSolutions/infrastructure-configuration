@@ -1,14 +1,5 @@
-- name: create application directory
-  file:
-    path: /opt/bin/admin
-    state: directory
-    mode: 0777
-
-- name: create application tmp directory
-  file:
-    path: /opt/bin/admin/tmp
-    state: directory
-    mode: 0777
+- name: create directories
+  import_tasks: create_dirs.yml
 
 # main files are uploaded unless {files} is provided at a higher level
 - name: upload admin files 
@@ -16,6 +7,15 @@
   vars:
     files:
       admin.service: /lib/systemd/system/
+  become: true
+
+- name: get database data
+  import_tasks: ../../../tasks/get_db_data.yml
 
 - name: push config files
   import_tasks: push_config.yml
+
+- name: deploy jwt token
+  import_tasks: ../../../tasks/jwt_token.yml
+  vars:
+    app: admin
