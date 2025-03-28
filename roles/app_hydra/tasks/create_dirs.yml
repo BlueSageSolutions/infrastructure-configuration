@@ -1,0 +1,13 @@
+- name: create application directory
+  file:
+    path: /opt/bin/hydra
+    state: directory
+    mode: 0777
+  become: true
+
+- name: create application tmp directory
+  file:
+    path: /opt/bin/hydra/tmp
+    state: directory
+    mode: 0777
+  become: true

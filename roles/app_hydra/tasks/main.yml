@@ -2,17 +2,18 @@
   import_tasks: create_dirs.yml
 
 # main files are uploaded unless {files} is provided at a higher level
-- name: upload hip files 
+- name: upload hydra files 
   import_tasks: ../../../tasks/upload_files.yml
   vars:
     files:
-      hip.service: /lib/systemd/system/
-      hip.sh: /opt/bin/hip/
+      hydra.service: /lib/systemd/system/
+      hydra.sh: /opt/bin/hydra/
+      application.properties: /opt/bin/hydra/
   become: true
 
 - name: give permissions to startup file
   file:
-    path: /opt/bin/hip/hip.sh
+    path: /opt/bin/hydra/hydra.sh
     mode: 0755
   become: true
 
@@ -22,7 +23,3 @@
 - name: push config files
   import_tasks: push_config.yml
 
-- name: deploy jwt token
-  import_tasks: ../../../tasks/jwt_token.yml
-  vars:
-    app: hip
