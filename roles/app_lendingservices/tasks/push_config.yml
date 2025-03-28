@@ -1,0 +1,4 @@
+- name: template - config.groovy
+  template:
+    src: templates/config.groovy.j2
+    dest: /opt/bin/lendingservices/config.groovy

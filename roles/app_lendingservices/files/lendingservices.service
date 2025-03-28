@@ -1,0 +1,11 @@
+[Unit]
+Description=Start Lending Services server
+After=network.target
+
+[Service]
+ExecStart=/opt/bin/lendingservices/lendingservices.sh
+KillSignal=SIGKILL
+KillMode=mixed
+
+[Install]
+WantedBy=multi-user.target
