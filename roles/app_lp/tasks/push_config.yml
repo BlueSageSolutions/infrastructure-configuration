@@ -1,0 +1,10 @@
+- name: template - lp.sh
+  template:
+    src: templates/lp.sh.j2
+    dest: /opt/bin/lp/lp.sh
+    mode: 0755
+
+- name: template - config.groovy
+  template:
+    src: templates/config.groovy.j2
+    dest: /opt/bin/lp/config.groovy

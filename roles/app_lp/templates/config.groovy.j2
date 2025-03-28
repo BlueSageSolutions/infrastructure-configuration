@@ -1,0 +1,79 @@
+{% set collation = "&characterEncoding=latin1&connectionCollation=latin1_swedish_ci" if collation else "" %}
+def dbURL = "jdbc:mysql://{{ database.hostname }}/{{ database_schema }}?noAccessToProcedureBodies=true&useSSL=false&zeroDateTimeBehavior=convertToNull{{ collation }}"
+def dbUser = "{{ database.username }}"
+def dbPwd = "{{ database.password }}"
+
+mail.error.subject = '[LP Error: {{ client|upper }}-{{ env|upper }}]'
+
+realEC.activeMQ.receiveQueue='activemq:{{ activemq_real_ec }}'
+closingCorp.activeMQ.receiveQueue='activemq:{{ activemq_closing_corp }}'
+
+blitzdoc.update.disable = true
+
+docpath.keyfile="/root/.ssh/id_rsa"
+
+dataSource {
+    url = dbURL
+    username = dbUser
+    password = dbPwd
+}
+
+lendingComponents.rules.filename = "latest"
+lendingComponents.datasource.url = dbURL
+lendingComponents.datasource.username = dbUser
+lendingComponents.datasource.password = dbPwd
+
+grails.plugin.routing.jms.brokerURL = "tcp://docpath1.bluesageusa.com:61616"
+grails.plugin.routing.jms.userName = "bssuser"
+grails.plugin.routing.jms.password = "Blu3L1ncoln"
+
+header.loan.view = "LP.view.HeaderLoanExpanded"
+
+du.compare.ignoredProperties = [
+        "lenderAddressLineOne",
+        "lenderAddressLineTwo",
+        "lenderCaseNumber",
+        "lenderCity",
+        "lenderName",
+        "lenderState",
+        "lenderZipCode",
+        "lenderZipPlusFour",
+        "lenderTelephoneNumber",
+        "lenderNMLSId",
+        "country",
+        "borrowerCreditRating",
+        "productDescription",
+        "mortgageTerm",
+        "streetName",
+        "streetNumber",
+        "apartmentNumber",
+        "envelopeControlNumber",
+        "transactionControlNumber",
+        "transactionDate",
+        "channelId",
+        "condoProperty",
+        "creditScore",
+        "lenderId",
+        "pricingTierId",
+        "processTypeId",
+        "programTypeId",
+        "salesBranchId",
+        "borrowerRole",
+        "contactId",
+        "primaryBorrower"
+]
+
+errors.noemail.additional = [
+        "Failed delivery for",
+        "Error parsing XML",
+        "Could not refresh JMS Connection"
+]
+
+summary.data.update.config.filename = "bluesage-SummaryDataUpdateConfig.json"
+publish.activity.externalservice.enabled = true
+docVelocity.enabled = false
+paradatec.enabled = true
+
+docpath.host="docpath2.bluesageusa.com"
+
+rewriteBatchedStatements={{ rewrite_batched_statements }}

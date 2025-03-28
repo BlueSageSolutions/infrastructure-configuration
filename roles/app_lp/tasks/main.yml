@@ -1,0 +1,21 @@
+- name: create directories
+  import_tasks: create_dirs.yml
+
+# main files are uploaded unless {files} is provided at a higher level
+- name: upload lp files 
+  import_tasks: ../../../tasks/upload_files.yml
+  vars:
+    files:
+      lp.service: /lib/systemd/system/
+  become: true
+
+- name: get database data
+  import_tasks: ../../../tasks/get_db_data.yml
+
+- name: push config files
+  import_tasks: push_config.yml
+
+- name: deploy jwt token
+  import_tasks: ../../../tasks/jwt_token.yml
+  vars:
+    app: lp

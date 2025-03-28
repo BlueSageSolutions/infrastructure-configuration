@@ -40,7 +40,7 @@
       include_role:
         name: "app_{{ item }}"
       # when: item in ["lendingservices", "lp", "crm", "portal", "admin", "hydra", "hip", "lom"]
-      when: item in ["lendingservices"]
+      when: item in ["lp"]
       loop: "{{ apps }}"
 
     - name: restart nginx

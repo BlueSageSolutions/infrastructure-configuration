@@ -1,0 +1,12 @@
+[Unit]
+Description=Start Lending Platform server
+After=network.target
+
+[Service]
+# Environment="PATH=/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/home/ubuntu/.jenv/shims:/home/ubuntu/.jenv/bin"
+ExecStart=/opt/bin/lp/lp.sh
+KillSignal=SIGKILL
+KillMode=mixed
+
+[Install]
+WantedBy=multi-user.target
