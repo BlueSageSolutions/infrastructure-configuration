@@ -1,0 +1,10 @@
+[Unit]
+Description=Start Lending Platform HIP server
+After=network.target
+
+[Service]
+ExecStart=/opt/bin/hip/hip.sh
+KillSignal=SIGKILL
+
+[Install]
+WantedBy=multi-user.target

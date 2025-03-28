@@ -1,0 +1,50 @@
+def dbURL = "jdbc:mysql://{{ database.hostname }}/{{ database_schema }}?noAccessToProcedureBodies=true&useSSL=false&zeroDateTimeBehavior=convertToNull"
+def dbUser = "{{ database.username }}"
+def dbPwd = "{{ database.password }}"
+
+blitzdoc.update.disable=true
+mail.error.subject = '[CORE Error: {{ client|upper }}-{{ env|upper }}]'
+multipleLogins.allow = true
+
+custom.remn.disableAuthentication=false
+docpath.keyfile="/root/.ssh/id_rsa"
+
+lendingComponents.rules.filename = "latest"
+lendingComponents.datasource.url = dbURL
+lendingComponents.datasource.username = dbUser
+lendingComponents.datasource.password = dbPwd
+
+
+dataSource {
+    url = dbURL
+    username = dbUser
+    password = dbPwd
+}
+
+custom.remn.sellerReportingURL="http://uatservices.remnwholesale.com/webservices/SellerReports/default.aspx"
+// custom.remn.sellerReportingURL="http://uatservices.remnwholesale.com/sellerreport1.htm"
+custom.remn.sellerReportingMethod="POST"
+
+//header.logo = 'resources/images/mfmcorr_logo.png'
+//login.formBackground = 'resources/images/mfmcorr_background.jpg'
+header.logo = 'resources/images/bluesage_logo_small.png'
+login.formBackground = 'resources/images/bluesage_background.jpg'
+
+//log4j.main = {
+//    environments {
+//        production {
+//            debug  'grails.app.controllers',
+//                   'grails.app.services',
+//                   'grails.app.conf.BootStrap',
+//                   'com.bluesage',
+//                   'lendingplatform',
+//                   'com.bss'
+//        }
+//    }
+//}
+
+systemUser.userId="bu5vohQdR7ZZZYrfPqIluVoVXr0PZUK8"
+systemUser.password="bc1oYDMvktT/zH6a08lGF14c4nGB765xpSMioMVafV0="
+
+grails.plugin.routing.jms.brokerURL = "tcp://docpath1.bluesageusa.com:61616"
+docpath.host="docpath2.bluesageusa.com"

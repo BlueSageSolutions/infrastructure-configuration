@@ -1,0 +1,27 @@
+- name: create directories
+  import_tasks: create_dirs.yml
+
+# main files are uploaded unless {files} is provided at a higher level
+- name: upload hip files 
+  import_tasks: ../../../tasks/upload_files.yml
+  vars:
+    files:
+      hip.service: /lib/systemd/system/
+      hip.sh: /opt/bin/hip/
+  become: true
+
+- name: give permissions to startup file
+  file:
+    path: /opt/bin/hip/hip.sh
+    mode: 0755
+
+- name: get database data
+  import_tasks: ../../../tasks/get_db_data.yml
+
+- name: push config files
+  import_tasks: push_config.yml
+
+- name: deploy jwt token
+  import_tasks: ../../../tasks/jwt_token.yml
+  vars:
+    app: hip

@@ -1,0 +1,33 @@
+#!/bin/bash
+PORT=8095
+CONTEXT=core
+JAR=$(basename $0 .sh).jar  # get .jar filename and path from this file
+MY_PATH=$(dirname $0)
+JVM2=/usr/lib/jvm/zulu-7-amd64/bin/java
+JVM4=/usr/lib/jvm/java-11-amazon-corretto/bin/java
+COMMONOPTS="-server -DexternalRulesEngine=true -Djdk.tls.client.protocols=TLSv1.2 -Dhttps.protocols=TLSv1,TLSv1.1,TLSv1.2 -Djava.security.egd=file:///dev/./urandom -Dsun.net.http.retryPost=false"
+COMMONOPTS+=" -Dconfig.location=$MY_PATH/config.groovy -Djava.io.tmpdir=$MY_PATH/tmp"
+COMMONOPTS+=" -Djava.util.Arrays.useLegacyMergeSort=true"
+#COMMONOPTS+=" -javaagent:$MY_PATH/newrelic/newrelic.jar"
+TEMPOPTS=""
+
+cd $MY_PATH
+unzip -p $JAR META-INF/MANIFEST.MF | grep -q  "grails\.plugin\.standalone"
+if [[ $? -eq 0 ]]; then
+    echo "Using Grails 2"
+    JVM=$JVM2
+    OPTS="-Xms3g -Xmx5g -XX:PermSize=256m -XX:MaxPermSize=1024m -XX:+UseG1GC"
+    OPTS+=" -Djavax.xml.bind.JAXBContext=com.sun.xml.internal.bind.v2.ContextFactory"
+    G2OPTS="context=$CONTEXT port=$PORT"
+else
+    echo "Using Evergreen - Grails 4"
+    JVM=$JVM4
+    OPTS="-Xmx5g -Dserver.port=$PORT"
+    OPTS+=" -Dserver.servlet.context-path=/$CONTEXT"
+    if [[ -f $MY_PATH/logback.groovy ]]; then
+        OPTS+=" -Dlogging.config=$MY_PATH/logback.groovy"
+    fi
+fi
+
+[[ -f console.log ]] && mv console.log console.bak
+$JVM $COMMONOPTS $OPTS $TEMPOPTS -cp . -jar $JAR $G2OPTS >> console.log 2>&1
