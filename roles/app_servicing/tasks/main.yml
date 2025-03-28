@@ -1,0 +1,5 @@
+- name: create servicing subdirectory
+  file:
+    path: /opt/bin/servicing/config
+    state: directory
+    mode: 0777

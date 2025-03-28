@@ -1,0 +1,5 @@
+- name: lion app folder
+  file:
+    path: /opt/bin/apply
+    state: directory
+    mode: 0777
