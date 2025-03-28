@@ -1,0 +1,25 @@
+- name: configure aws with default region = us-east-1
+  file:
+    path: /home/ubuntu/.aws
+    state: directory
+    mode: 0755
+    owner: ubuntu
+    group: ubuntu
+
+- name: set fact to create .aws/config file
+  set_fact:
+    config_lines: "{{
+      [ '[default]' ] +
+      [ 'region = us-east-1' ]
+      }}"
+
+- name: create .aws/config file
+  lineinfile:
+    path: /home/ubuntu/.aws/config
+    line: "{{ item }}"
+    state: present
+    create: true
+    mode: 0600
+    owner: ubuntu
+    group: ubuntu
+  loop: "{{ config_lines }}"

@@ -1,0 +1,9 @@
+- name: create .vim folder
+  file:
+    path: .vim
+    state: directory
+
+- name: create vim file
+  copy:
+    src: ../files/vimrc
+    dest: .vim/vimrc
