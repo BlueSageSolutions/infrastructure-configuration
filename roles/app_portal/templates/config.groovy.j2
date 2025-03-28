@@ -1,0 +1,48 @@
+{% set collation = "&characterEncoding=latin1&connectionCollation=latin1_swedish_ci" if collation else "" %}
+def dbURL = "jdbc:mysql://{{ database.hostname }}/{{ database_schema }}?noAccessToProcedureBodies=true&useSSL=false&zeroDateTimeBehavior=convertToNull&{{ collation }}"
+def dbUser = "{{ database.username }}"
+def dbPwd = "{{ database.password }}"
+
+duImport.useDU32=false
+
+mail.error.subject = '[Portal Error: {{ client|upper }}-{{ env|upper }}]'
+
+dataSource {
+    url = dbURL
+    username = dbUser
+    password = dbPwd
+}
+
+lendingComponents.rules.filename = "latest"
+lendingComponents.datasource.url = dbURL
+lendingComponents.datasource.username = dbUser
+lendingComponents.datasource.password = dbPwd
+
+header.logo = 'resources/images/blue_sage_logo_1_200.png'
+login.formBackground = 'resources/images/bluesage_background.jpg'
+
+custom.remn.disableAuthentication=false  // needed for current code - if true, all users get ROLE_FULL
+custom.remn.assetCalc=true
+blitzdoc.update.disable=true
+session.timeout = 60
+
+grails.routing.autoStartup=false
+grails.plugin.routing.jms.brokerURL = "tcp://172.16.0.218:61617"
+grails.plugin.routing.jms.userName = "bssuser"
+grails.plugin.routing.jms.password = "Blu3L1ncoln"
+
+grails.plugin.awssdk.accessKey = "AKIAI7N2O45I3WNIJXNA"
+grails.plugin.awssdk.secretKey = "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"
+
+//log4j.external = {
+//    environments {
+//        production {
+//            debug   'grails.app.controllers',
+//                   'grails.app.services',
+//                   'grails.app.conf.BootStrap',
+//                   'com.bluesage',
+//                   'lendingplatform',
+//                   'com.bss'
+//        }
+//    }
+//}

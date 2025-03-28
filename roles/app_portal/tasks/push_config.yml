@@ -1,0 +1,10 @@
+- name: template - portal.sh
+  template:
+    src: templates/portal.sh.j2
+    dest: /opt/bin/portal/portal.sh
+    mode: 0755
+
+- name: template - config.groovy
+  template:
+    src: templates/config.groovy.j2
+    dest: /opt/bin/portal/config.groovy

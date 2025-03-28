@@ -1,0 +1,10 @@
+[Unit]
+Description=Start Portal server
+After=network.target
+
+[Service]
+ExecStart=/opt/bin/portal/portal.sh
+KillMode=mixed
+
+[Install]
+WantedBy=multi-user.target
