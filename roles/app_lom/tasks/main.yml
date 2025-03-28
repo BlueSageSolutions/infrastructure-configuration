@@ -1,0 +1,16 @@
+- name: create directories
+  import_tasks: create_dirs.yml
+
+# main files are uploaded unless {files} is provided at a higher level
+- name: upload lom files 
+  import_tasks: ../../../tasks/upload_files.yml
+  vars:
+    files:
+      lom.service: /lib/systemd/system/
+  become: true
+
+- name: get database data
+  import_tasks: ../../../tasks/get_db_data.yml
+
+- name: push config files
+  import_tasks: push_config.yml

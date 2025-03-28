@@ -1,0 +1,154 @@
+{% set collation = "&characterEncoding=latin1&connectionCollation=latin1_swedish_ci" if collation else "" %}
+import groovy.json.JsonOutput
+import com.google.gson.Gson
+
+def dbURL = "jdbc:mysql://{{ database.hostname }}/{{ database_schema }}?noAccessToProcedureBodies=true&useSSL=false&zeroDateTimeBehavior=convertToNull{{ collation }}"
+def dbUser = "{{ database.username }}"
+def dbPwd = "{{ database.password }}"
+
+def useSSO = (System.properties["useSSO"] == "true") ? true : false
+
+mail.error.subject = '[LOM Error: {{ client|upper }}-{{ env|upper }}]'
+multipleLogins.allow = true
+
+dataSource {
+    url = dbURL
+    username = dbUser
+    password = dbPwd
+}
+
+lendingComponents.rules.filename = "latest"
+lendingComponents.datasource.url = dbURL
+lendingComponents.datasource.username = dbUser
+lendingComponents.datasource.password = dbPwd
+
+crm.cocRequired = "N"
+
+fee.service.autoprocess.canshopfees.enabled = true
+
+log4j.main = {
+    environments {
+        production {
+            root {
+                info 'stdout', 'rollingFile'
+                error 'smtp'
+            }
+
+            debug   'grails.app.controllers',
+                   'grails.app.services',
+                   'grails.app.conf.BootStrap',
+                   'com.bluesage',
+                   'lendingplatform',
+                   'com.bss'
+        }
+    }
+}
+
+
+fullstory.enabled = false
+
+grails.plugin.springsecurity.saml.active = useSSO
+// grails.plugin.springsecurity.saml.forceAuthN = true
+
+if (useSSO) {
+
+    log4j.external = {
+        debug   'grails.app.controllers',
+                'grails.app.services',
+                'grails.app.conf.BootStrap',
+                'lendingplatform',
+                'com.bluesage.lending.components',
+                'grails.plugin.springsecurity',
+                'org.grails.plugin.springsecurity',
+                'SpringSecuritySamlGrailsPlugin',
+                'org.springframework.security.saml',
+                'org.opensaml',
+                'PROTOCOL_MESSAGE'
+
+            // info   'org.springframework.security.web.util.matcher.AntPathRequestMatcher',
+
+        info    'org.springframework.security.web.FilterChainProxy',
+                'org.springframework.security.web.context',
+                'org.opensaml.xml.XMLObjectBuilderFactory',
+                'org.opensaml.xml.XMLConfigurator',
+                'org.opensaml.xml.Configuration',
+                'org.opensaml.xml.io.MarshallerFactory',
+                'org.opensaml.xml.io.UnmarshallerFactory',
+                'org.springframework.security.saml.metadata.MetadataManager'
+
+        trace   'org.apache.catalina.authenticator',
+                'org.springframework.security',
+                'org.springframework.security.web.FilterChainProxy',
+                'org.springframework.web.filter',
+                'org.grails.web.servlet.mvc'
+
+    }
+
+    println "Using SSO..."
+    def newChainMap, newRules
+    if (System.getenv("BSS_LOM_GRAILS2") == null || System.getenv("BSS_LOM_GRAILS2") == "1") {
+        newChainMap = [
+            '/login/authfail': 'none'
+        ]
+        grails.plugin.springsecurity.filterChain.chainMap = newChainMap + grails.plugin.springsecurity.filterChain.chainMap
+
+        newRules = [
+            '/saml/**': ['permitAll'],
+            '/metadata/**': ['permitAll'],
+            '/idp/**': ['permitAll'],
+            '/login/authfail': ['permitAll'],
+            '/loan/unlockMyLoans': ['permitAll']
+        ]
+        grails.plugin.springsecurity.controllerAnnotations.staticRules = newRules + grails.plugin.springsecurity.controllerAnnotations.staticRules
+    } else {
+        newChainMap = [
+             [pattern: '/login/authfail', filters: 'none']
+        ]
+        grails.plugin.springsecurity.filterChain.chainMap = newChainMap + grails.plugin.springsecurity.filterChain.chainMap
+
+        newRules = [
+             [pattern: '/saml/**', access: ['permitAll']],
+             [pattern: '/metadata/**', access: ['permitAll']],
+             [pattern: '/idp/**', access: ['permitAll']],
+             [pattern: '/login/authfail', access: ['permitAll']],
+             [pattern: '/loan/unlockMyLoans', access: ['permitAll']]
+        ]
+        grails.plugin.springsecurity.controllerAnnotations.staticRules = newRules + grails.plugin.springsecurity.controllerAnnotations.staticRules
+    }
+
+    // this is critical or you get an infinite loop
+    grails.plugin.springsecurity.remove("auth")
+
+    grails.plugin.springsecurity.userLookup.accountExpiredPropertyName = 'passwordExpiredYn'
+    grails.plugin.springsecurity.rejectIfNoRule = true
+    grails.plugin.springsecurity.authority.nameField = 'userTypeId'
+
+    grails.plugin.springsecurity.saml.contextProvider.scheme='https'
+    grails.plugin.springsecurity.saml.maxAuthenticationAge = 604800  // 7 days
+    grails.plugin.springsecurity.saml.contextProvider.serverName='homebridge-uat.bluesageusa.com'
+    grails.plugin.springsecurity.saml.contextProvider.contextPath='/lom'
+    grails.plugin.springsecurity.saml.contextProvider.serverPort=443
+    grails.plugin.springsecurity.saml.contextProvider.includeServerPortInRequestURL=false
+
+    grails.plugin.springsecurity.saml.userAttributeMappings = [username: 'http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress']
+    // grails.plugin.springsecurity.saml.userAttributeMappings = [username: 'UserID']
+    grails.plugin.springsecurity.saml.afterLoginUrl = '/'
+    grails.plugin.springsecurity.saml.alwaysUseAfterLoginUrl = true
+    grails.plugin.springsecurity.saml.afterLogoutUrl = '/'
+    grails.plugin.springsecurity.saml.userGroupAttribute = "memberOf"
+    grails.plugin.springsecurity.saml.responseSkew = 60
+    grails.plugin.springsecurity.saml.autoCreate.active =  false
+    grails.plugin.springsecurity.saml.autoCreate.key = 'userId'
+    grails.plugin.springsecurity.saml.autoCreate.assignAuthorities = true
+    grails.plugin.springsecurity.saml.metadata.providers = [ idp :'/opt/bin/lom/BlueSage-UAT-LOM.xml']
+    // grails.plugin.springsecurity.saml.metadata.providers = [ idp :'/opt/bin/lom/okta.xml']
+    grails.plugin.springsecurity.saml.metadata.sp.file = '/opt/bin/lom/sp.xml'
+    grails.plugin.springsecurity.saml.metadata.sp.defaults.alias = 'https://lom.hb-uat.com/sp'
+    grails.plugin.springsecurity.saml.keyManager.storeFile = "file:/opt/bin/lom/keystore.jks"
+}
+
+println "Grails Spring Security configuration:"
+println JsonOutput.prettyPrint(new Gson().toJson(grails.plugin.springsecurity))
+println "Spring configuration:"
+println JsonOutput.prettyPrint(new Gson().toJson(spring))
+

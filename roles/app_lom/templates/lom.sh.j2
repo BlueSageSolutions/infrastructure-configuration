@@ -1,6 +1,6 @@
-{% set loc_context  = ""  if root_context else "crm" %}
+{% set loc_context  = ""  if root_context else "lom" %}
 #!/bin/bash
-PORT=8097
+PORT=8197
 CONTEXT={{ loc_context }}
 JAR=$(basename $0 .sh).jar  # get .jar filename and path from this file
 MY_PATH=$(dirname $0)
@@ -9,21 +9,24 @@ JVM4=/usr/lib/jvm/java-11-amazon-corretto/bin/java
 COMMONOPTS="-server -DexternalRulesEngine=true -Djdk.tls.client.protocols=TLSv1.2 -Dhttps.protocols=TLSv1.2 -Djava.security.egd=file:///dev/./urandom -Dsun.net.http.retryPost=false"
 COMMONOPTS+=" -Dconfig.location=$MY_PATH/config.groovy -Djava.io.tmpdir=$MY_PATH/tmp"
 COMMONOPTS+=" -Djava.util.Arrays.useLegacyMergeSort=true"
-#COMMONOPTS+=" -javaagent:$MY_PATH/newrelic/newrelic.jar"
-TEMPOPTS=""
+# COMMONOPTS+=" -javaagent:$MY_PATH/newrelic/newrelic.jar"
+# set context path for SAML SSO usage (return to application button on logout page)
+TEMPOPTS=" -Dcontext=/$CONTEXT -DuseSSO=false"
 
 cd $MY_PATH
 unzip -p $JAR META-INF/MANIFEST.MF | grep -q  "grails\.plugin\.standalone"
 if [[ $? -eq 0 ]]; then
     echo "Using Grails 2"
+    export BSS_LOM_GRAILS2=1
     JVM=$JVM2
-    OPTS="-Xms3g -Xmx6g -XX:PermSize=256m -XX:MaxPermSize=1024m -XX:+UseG1GC"
+    OPTS="-Xms3g -Xmx4g -XX:PermSize=256m -XX:MaxPermSize=1024m -XX:+UseG1GC"
     OPTS+=" -Djavax.xml.bind.JAXBContext=com.sun.xml.internal.bind.v2.ContextFactory"
     G2OPTS="context=$CONTEXT port=$PORT"
 else
     echo "Using Evergreen - Grails 4"
+    export BSS_LOM_GRAILS2=0
     JVM=$JVM4
-    OPTS="-Xmx5g -Dserver.port=$PORT"
+    OPTS="-Xmx4g -Dserver.port=$PORT"
     OPTS+=" -Dserver.servlet.context-path=/$CONTEXT"
     if [[ -f $MY_PATH/logback.groovy ]]; then
         OPTS+=" -Dlogging.config=$MY_PATH/logback.groovy"
@@ -32,4 +35,3 @@ fi
 
 [[ -f console.log ]] && mv console.log console.bak
 $JVM $COMMONOPTS $OPTS $TEMPOPTS -cp . -jar $JAR $G2OPTS >> console.log 2>&1
-

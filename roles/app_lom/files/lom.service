@@ -1,0 +1,11 @@
+[Unit]
+Description=Start Lending Platform LOM server
+After=network.target
+
+[Service]
+ExecStart=/opt/bin/lom/lom.sh
+KillMode=mixed
+KillSignal=SIGKILL
+
+[Install]
+WantedBy=multi-user.target
