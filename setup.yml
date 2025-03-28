@@ -39,8 +39,7 @@
     - name: Run applications tasks
       include_role:
         name: "app_{{ item }}"
-      # when: item in ["lendingservices", "lp", "crm", "portal", "admin", "hydra", "hip", "lom"]
-      when: item in ["lp"]
+      when: item in ["lendingservices", "lp", "crm", "portal", "admin", "hydra", "hip", "lom"]
       loop: "{{ apps }}"
 
     - name: restart nginx
