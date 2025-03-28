@@ -1,0 +1,22 @@
+- name: set ssm_map to search ssm params
+  set_fact:
+    ssm_map:
+      homebridge: hb
+      kindretail: kindr
+      lendage: lend
+      mfmcorr: mfmc
+      springeq: seq
+      springeqfirst: seqf
+      westerra: west
+
+- name: set ssm_client
+  set_fact:
+    ssm_client: "{{ ssm_map[client] if client in ssm_map.keys() | list else client }}"
+
+- name: get database data
+  set_fact:
+    database: "{{ lookup('amazon.aws.aws_ssm', '/secrets/' + ssm_client + '/' + env + '/database/application-user', aws_profile='sso-devops-bss-devops') }}"
+
+- name: get database schema
+  set_fact:
+    database_schema: "{{ lookup('amazon.aws.aws_ssm', '/secrets/' + ssm_client + '/' + env + '/database/schema-name', aws_profile='sso-devops-bss-devops') }}"

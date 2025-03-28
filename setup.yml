@@ -7,15 +7,51 @@
     env: "{{ inventory_hostname.split('_')[1] }}"
     apps: "{{ hostvars[inventory_hostname].apps }}"
 
-  tasks:    
-    - name: Nginx
+  tasks:
+    - name: Update apt
+      shell: sudo apt update
+
+    # run once?
+    - name: Install packages
+      expect:
+        command: sudo apt install curl gnupg2 ca-certificates lsb-release ubuntu-keyring
+        responses:
+          "Do you want to continue?": "Y"
+
+    # should this be a role?
+    - name: Set .aws/config
+      include_tasks: tasks/aws_config.yml
+
+    - name: Run cloudwatch tasks
+      include_role:
+        name: cloudwatch
+
+    # should this be a role?
+    - name: Set vim config
+      include_tasks: tasks/vim.yml
+            
+    - name: Run nginx tasks
       include_role:
         name: nginx
-      tags:
-        - nginx
 
-    - name: Install Java Agents
+    ## NEWRELIC ##
+
+    - name: Run applications tasks
       include_role:
-        name: install_newrelic_agent
-      tags:
-        - newrelic
+        name: "app_{{ item }}"
+      when: item in ["lendingservices", "lp", "crm", "portal", "admin", "hydra", "hip", "lom"]
+      loop: "{{ apps }}"
+
+    - name: restart nginx
+      service: 
+        name: nginx
+        state: restarted
+        enabled: yes
+      become: yes      
+
+    - name: restart apps
+      shell: |
+        systemctl restart {{ item }}.service
+      loop: "{{ apps }}"
+      when: item in ["lendingservices", "lp", "crm", "portal", "admin", "hydra", "lom"]
+      become: yes

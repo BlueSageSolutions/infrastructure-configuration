@@ -1,0 +1,11 @@
+[Unit]
+Description=Start Lending Platform CRM server
+After=network.target
+
+[Service]
+ExecStart=/opt/bin/crm/crm.sh
+KillSignal=SIGKILL
+KillMode=mixed
+
+[Install]
+WantedBy=multi-user.target

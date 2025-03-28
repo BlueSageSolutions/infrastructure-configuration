@@ -1,0 +1,10 @@
+- name: template - crm.sh
+  template:
+    src: templates/crm.sh.j2
+    dest: /opt/bin/crm/crm.sh
+    mode: 0755
+
+- name: template - config.groovy
+  template:
+    src: templates/config.groovy.j2
+    dest: /opt/bin/crm/config.groovy

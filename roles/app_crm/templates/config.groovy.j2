@@ -1,0 +1,33 @@
+{% set collation = "&characterEncoding=latin1&connectionCollation=latin1_swedish_ci" if collation else "" %}
+def dbURL = "jdbc:mysql://{{ database.hostname }}/{{ database_schema }}?noAccessToProcedureBodies=true&useSSL=false&zeroDateTimeBehavior=convertToNull{{ collation }}"
+def dbUser = "{{ database.username }}"
+def dbPwd = "{{ database.password }}"
+
+mail.error.subject = '[CRM Error: {{ client|upper }}-{{ env|upper }}]'
+multipleLogins.allow = true
+
+dataSource {
+    url = dbURL
+    username = dbUser
+    password = dbPwd
+}
+
+lendingComponents.rules.filename = "latest"
+lendingComponents.datasource.url = dbURL
+lendingComponents.datasource.username = dbUser
+lendingComponents.datasource.password = dbPwd
+
+docpath.host="docpath2.bluesageusa.com"
+docpath.username="ubuntu"
+docpath.keyfile="/root/.ssh/id_rsa"
+docpath.sendToDir="/home/docpath/4.1/Controller/scan/data1"
+docpath.receiveFromDir="/home/docpath/4.1/Controller/output/"
+docpath.staticFileDir="/home/docpath/static/"
+
+cors.url.pattern = ['/*']
+
+summary.data.update.config.filename = "bluesage-SummaryDataUpdateConfig.json"
+publish.activity.externalservice.enabled = true
+docVelocity.enabled = false
+
+grails.plugin.routing.jms.brokerURL = "tcp://docpath1.bluesageusa.com:61616"
