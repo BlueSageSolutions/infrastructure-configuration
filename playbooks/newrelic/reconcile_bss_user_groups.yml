@@ -232,7 +232,7 @@
                         }'
         )
 
-        CLIENT_ACCOUNT_METADATA=$(echo $QUERY_ACCOUNT_RESPONSE | jq '.data.actor.organization.accountManagement.managedAccounts.[] | select(.name != "Blue Sage Solutions")')
+        CLIENT_ACCOUNT_METADATA=$(echo $QUERY_ACCOUNT_RESPONSE | jq '.data.actor.organization.accountManagement.managedAccounts.[]')
         CLIENT_ACCOUNT_IDS=$(echo $CLIENT_ACCOUNT_METADATA | jq -s '[.[].id]')
 
         echo $CLIENT_ACCOUNT_IDS
