@@ -3,6 +3,7 @@
   get_url:
     url: https://s3.us-east-1.amazonaws.com/amazoncloudwatch-agent-us-east-1/debian/amd64/latest/amazon-cloudwatch-agent.deb
     dest: /home/ubuntu/
+  become: yes # didn't need this before..
 
 - name: Install the cloudwatch agent package
   command: dpkg -i -E /home/ubuntu/amazon-cloudwatch-agent.deb

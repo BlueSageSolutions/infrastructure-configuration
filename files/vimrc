@@ -1,0 +1,13 @@
+:color desert
+set nowrap
+set nowrapscan
+set noincsearch
+set shiftwidth=4 
+set visualbell t_vb= 
+set noerrorbells 
+set foldlevel=99 
+set whichwrap=<,>,h,l 
+set sidescroll=1 
+set expandtab 
+set tabpagemax=60 
+set tabstop=4 

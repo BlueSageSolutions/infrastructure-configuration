@@ -1,6 +1,5 @@
-{% set loc_context  = ""  if root_context else "lp" %}
 #!/bin/bash
-PORT={{ loc_context }}
+PORT=
 CONTEXT=
 JAR=$(basename $0 .sh).jar  # get .jar filename and path from this file
 MY_PATH=$(dirname $0)
