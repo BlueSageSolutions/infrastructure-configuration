@@ -161,6 +161,17 @@
                             "variables": ""
                         }'
         )
+        echo $UPDATE_PERMISSIONS_RESPONSE
+      register: update_bss_management_admin_permissions
+
+    - name: Set Client Group ID as Fact
+      delegate_to: localhost
+      run_once: true
+      set_fact:
+        update_bss_management_admin_permissions: "{{ update_bss_management_admin_permissions.stdout }}"
+
+    - debug:
+        var: update_bss_management_admin_permissions
 
     - name: Update bss_management_readonly_group Permissions
       delegate_to: localhost
@@ -174,6 +185,17 @@
                             "variables": ""
                         }'
         )
+        echo $UPDATE_PERMISSIONS_RESPONSE
+      register: update_bss_management_readonly_permissions
+
+    - name: Set Client Group ID as Fact
+      delegate_to: localhost
+      run_once: true
+      set_fact:
+        update_bss_management_readonly_permissions: "{{ update_bss_management_readonly_permissions.stdout }}"
+
+    - debug:
+        var: update_bss_management_readonly_permissions
 
     - name: Update client read only group Permissions
       delegate_to: localhost
@@ -187,3 +209,14 @@
                             "variables": ""
                         }'
         )
+        echo $UPDATE_PERMISSIONS_RESPONSE
+      register: update_client_read_only_permissions
+
+    - name: Set Client Group ID as Fact
+      delegate_to: localhost
+      run_once: true
+      set_fact:
+        update_client_read_only_permissions: "{{ update_client_read_only_permissions.stdout }}"
+
+    - debug:
+        var: update_client_read_only_permissions
