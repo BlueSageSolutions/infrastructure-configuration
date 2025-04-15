@@ -12,12 +12,18 @@ class SsmClient:
         self.ssm_client = ssm_client
 
     def get_parameters_by_name(self, names: List[str]) -> GetParametersResponse:
-        response: Dict[str, str] = self.ssm_client.get_parameters(
-            Names=names,
-            WithDecryption=True,
-        )
+        result: Dict[str, str] = {"Parameters": []}
 
-        return GetParametersResponse(**response)
+        for pos in range(0, len(names), 10):
+            name_sublist: List[str] = names[pos:pos + 10]
+            response: Dict[str, str] = self.ssm_client.get_parameters(
+                Names=name_sublist,
+                WithDecryption=True,
+            )
+            result["Parameters"] += response["Parameters"]
+
+
+        return GetParametersResponse(**result)
 
     def update_client_profile(self, profile_name: str):
         session = Session(profile_name=profile_name)
@@ -91,9 +97,10 @@ class NginxPortMapping(BaseModel):
                 mappings[port] = [app]
 
         return mappings
+
     @property
     def app_name(self) -> str:
-        return self.Name.split('/')[-1].split('-')[0]
+        return self.Name.split("/")[-1].split("-")[0]
 
     @staticmethod
     def get_parameter_path(client_code: str, env: str, app: str):
