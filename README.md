@@ -59,6 +59,11 @@ Ensure you are in a virtual environment before running the following command:
 ansible-playbook -i inventory/<path to host file> setup.yml -u ubuntu
 ```
 
+You can also run specifc parts of a playbook by passing in a tag. Below is an example if you wanted to just install newrelic java agents:
+```
+ansible-playbook --tags newrelic -i inventory/lower/01-move.yml setup.yml -u ubuntu
+```
+
 #### New Relic
 New relic account, and client read only group must be created using the bootstrap playbook:
 ```
