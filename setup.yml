@@ -7,20 +7,15 @@
     env: "{{ inventory_hostname.split('_')[1] }}"
     apps: "{{ hostvars[inventory_hostname].apps }}"
 
-  tasks:
-    - name: Update apt
-      shell: sudo apt update
+  tasks:    
+    - name: Nginx
+      include_role:
+        name: nginx
+      tags:
+        - nginx
 
-    - name: Install packages
-      expect:
-        command: sudo apt install curl gnupg2 ca-certificates lsb-release ubuntu-keyring
-        responses:
-          "Do you want to continue?": "Y"
-    
-    # - name: Nginx
-    #   include_role:
-    #     name: nginx
-
-    # - name: Install Java Agents
-    #   include_role:
-    #     name: install_newrelic_agent
+    - name: Install Java Agents
+      include_role:
+        name: install_newrelic_agent
+      tags:
+        - newrelic

@@ -15,13 +15,12 @@ class SsmClient:
         result: Dict[str, str] = {"Parameters": []}
 
         for pos in range(0, len(names), 10):
-            name_sublist: List[str] = names[pos:pos + 10]
+            name_sublist: List[str] = names[pos : pos + 10]
             response: Dict[str, str] = self.ssm_client.get_parameters(
                 Names=name_sublist,
                 WithDecryption=True,
             )
             result["Parameters"] += response["Parameters"]
-
 
         return GetParametersResponse(**result)
 

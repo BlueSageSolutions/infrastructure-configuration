@@ -11,13 +11,23 @@
 
     echo $API_KEY
   register: api_key
+  tags:
+    - newrelic
+
 - name: Set Api Key as Fact
   run_once: true
   set_fact:
     api_key: "{{ api_key.stdout }}"
+  tags:
+    - newrelic
 
 - name: get_license_key
   run_once: true
   import_tasks: get_license_key.yml
+  tags:
+    - newrelic
+
 - name: install_newrelic_java_agent
   import_tasks: install_newrelic_java_agent.yml
+  tags:
+    - newrelic
