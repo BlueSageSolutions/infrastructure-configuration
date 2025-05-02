@@ -16,7 +16,19 @@
 - name: get database data
   set_fact:
     database: "{{ lookup('amazon.aws.aws_ssm', '/secrets/' + ssm_client + '/' + env + '/database/application-user', aws_profile='sso-devops-bss-devops') }}"
+  when: env not in ["sit"]
 
 - name: get database schema
   set_fact:
     database_schema: "{{ lookup('amazon.aws.aws_ssm', '/secrets/' + ssm_client + '/' + env + '/database/schema-name', aws_profile='sso-devops-bss-devops') }}"
+  when: env not in ["sit"]
+
+- name: get database data for sit env - uses uat creds
+  set_fact:
+    database: "{{ lookup('amazon.aws.aws_ssm', '/secrets/' + ssm_client + '/uat/database/application-user', aws_profile='sso-devops-bss-devops') }}"
+  when: env in ["sit"]
+
+- name: get database schema for sit env - uses uat creds
+  set_fact:
+    database_schema: "{{ lookup('amazon.aws.aws_ssm', '/secrets/' + ssm_client + '/uat/database/schema-name', aws_profile='sso-devops-bss-devops') }}"
+  when: env in ["sit"]  

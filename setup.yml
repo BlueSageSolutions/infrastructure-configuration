@@ -11,12 +11,12 @@
     - name: Update apt
       shell: sudo apt update
 
-    # run once?
-    - name: Install packages
-      expect:
-        command: sudo apt install curl gnupg2 ca-certificates lsb-release ubuntu-keyring
-        responses:
-          "Do you want to continue?": "Y"
+    # # run once?
+    # - name: Install packages
+    #   expect:
+    #     command: sudo apt install curl gnupg2 ca-certificates lsb-release ubuntu-keyring
+    #     responses:
+    #       "Do you want to continue?": "Y"
 
     # should this be a role?
     - name: Set .aws/config
