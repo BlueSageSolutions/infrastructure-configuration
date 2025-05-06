@@ -1,0 +1,9 @@
+[Unit] 
+Description=Shuttle server 
+
+[Service] 
+KillSignal=SIGKILL 
+WorkingDirectory=/opt/bin/shuttle 
+ExecStart=/opt/bin/shuttle/shuttle.sh 
+SuccessExitStatus=143 
+TimeoutStopSec=10 

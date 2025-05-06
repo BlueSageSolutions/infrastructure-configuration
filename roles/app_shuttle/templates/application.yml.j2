@@ -1,0 +1,19 @@
+amazon:
+    accessKey: {{ hydra_access_key | default('') }}
+    secretKey: {{ hydra_secret_key | default('') }}
+    sqs:
+{% if bluedlp %}
+        queue: {{ client }}-{{ env }}-hydra-inbound.fifo
+{% else %}
+        queue: {{ env }}-hydra-inbound.fifo
+{% endif %}
+
+dataSource:
+    pooled: true
+    jmxExport: true
+    driverClassName: com.mysql.jdbc.Driver
+    dialect: org.hibernate.dialect.MySQL5InnoDBDialect
+    dbCreate: ''
+    username: {{ database.username }}
+    password: {{ database.password }}
+    url: jdbc:mysql://{{ cluster_path }}/{{ database_schema }}?noAccessToProcedureBodies=true&useSSL=false&zeroDateTimeBehavior=convertToNull

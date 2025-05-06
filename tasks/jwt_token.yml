@@ -15,7 +15,7 @@
 
 - name: get jwt token
   set_fact:
-    jwt_token: "{{ lookup('amazon.aws.aws_ssm', '/secrets/' + ssm_client + '/' + env + '/' + app + '/' + 'jwt-password', aws_profile='sso-devops-bss-devops') }}"
+    jwt_token: "{{ lookup('amazon.aws.aws_ssm', '/secrets/' + ssm_client + '/' + env + '/' + app + '/' + 'jwt-password', aws_profile=bss_devops_aws_profile) }}"
 
 - name: add line to config.groovy
   lineinfile:
