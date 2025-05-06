@@ -23,9 +23,9 @@
     mode: 0755
   become: true
 
-# - name: get database data
-#   import_tasks: ../../../tasks/get_db_data.yml
+- name: get database data
+  import_tasks: ../../../tasks/get_db_data.yml
 
-# - name: push config files
-#   import_tasks: push_config.yml
+- name: push config files
+  import_tasks: push_config.yml
 

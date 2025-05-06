@@ -12,21 +12,21 @@
   set_fact:
     ssm_env: "{{ 'lower' if env in lower_envs else env }}"
 
-- name: get hydra credentials secret
+- name: get shuttle credentials secret
   set_fact:
-    hydra_secret: "{{ lookup('amazon.aws.aws_secret', '/dbconfig/' + ssm_env + '/' + client + '-' + ssm_env + '-hydra-aws-credentials', aws_profile=aws_profile) }}"
+    shuttle_secret: "{{ lookup('amazon.aws.aws_secret', '/dbconfig/' + ssm_env + '/' + client + '-' + ssm_env + '-shuttle-aws-credentials', aws_profile=aws_profile) }}"
 
-- name: get hydra credentials
+- name: get shuttle credentials
   set_fact:
-    hydra_access_key: "{{ hydra_secret.access_key }}"
-    hydra_secret_key: "{{ hydra_secret.secret_key }}"
+    shuttle_access_key: "{{ shuttle_secret.access_key }}"
+    shuttle_secret_key: "{{ shuttle_secret.secret_key }}"
 
 - name: template - application.yml
   vars: 
     cluster_path: "{{ database.hostname | replace('cluster-', 'cluster-ro-') }}"
   template:
     src: templates/application.yml.j2
-    dest: /opt/bin/hydra/application.yml
+    dest: /opt/bin/shuttle/application.yml
   when: env not in ["dev"]
 
 - name: template - application.yml
@@ -34,5 +34,5 @@
     cluster_path: "{{ database.hostname }}"
   template:
     src: templates/application.yml.j2
-    dest: /opt/bin/hydra/application.yml
+    dest: /opt/bin/shuttle/application.yml
   when: env in ["dev"]

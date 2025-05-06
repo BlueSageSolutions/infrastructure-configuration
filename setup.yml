@@ -6,18 +6,9 @@
     client: "{{ inventory_hostname.split('_')[0] }}"
     env: "{{ inventory_hostname.split('_')[1] }}"
     apps: "{{ hostvars[inventory_hostname].apps }}"
+    bss_devops_aws_profile: "it-devops-bss-devops"
 
   tasks:
-    - name: Update apt
-      shell: sudo apt update
-
-    # # run once?
-    # - name: Install packages
-    #   expect:
-    #     command: sudo apt install curl gnupg2 ca-certificates lsb-release ubuntu-keyring
-    #     responses:
-    #       "Do you want to continue?": "Y"
-
     # should this be a role?
     - name: Set .aws/config
       include_tasks: tasks/aws_config.yml
@@ -34,12 +25,10 @@
       include_role:
         name: nginx
 
-    ## NEWRELIC ##
-
     - name: Run applications tasks
       include_role:
         name: "app_{{ item }}"
-      when: item in ["lendingservices", "lp", "crm", "portal", "admin", "hydra", "hip", "lom"]
+      when: item in ["lendingservices", "lp", "crm", "portal", "admin", "hydra", "hip", "lom", "shuttle"]
       loop: "{{ apps }}"
 
     - name: restart nginx
@@ -53,5 +42,9 @@
       shell: |
         systemctl restart {{ item }}.service
       loop: "{{ apps }}"
-      when: item in ["lendingservices", "lp", "crm", "portal", "admin", "hydra", "lom"]
+      when: item in ["lendingservices", "lp", "crm", "portal", "admin", "hydra", "lom", "shuttle"]
       become: yes
+
+    # - name: Install new relic agent
+    #   include_role:
+    #     name: install_newrelic_java_agent

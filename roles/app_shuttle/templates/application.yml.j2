@@ -1,19 +1,27 @@
-amazon:
-    accessKey: {{ hydra_access_key | default('') }}
-    secretKey: {{ hydra_secret_key | default('') }}
-    sqs:
-{% if bluedlp %}
-        queue: {{ client }}-{{ env }}-hydra-inbound.fifo
-{% else %}
-        queue: {{ env }}-hydra-inbound.fifo
-{% endif %}
+server:
+    port: 9090
+
+shuttle:
+    config:
+        cacheClearPeriod: 600
+        failCheck: 180 #seconds
+        heartBeat: 10 # seconds
+        uniqueName: shuttle{{ client | upper }}{{ env | upper }} # this should be unique for every instance of shuttle
+        resource:
+            aws:
+                cred: /opt/bin/shuttle/resources #/home/ubuntu/opt/shuttle/resources
+                sqs:
+                    accessKey: {{ shuttle_access_key | default('') }}
+                    secretKey: {{ shuttle_secret_key | default('') }}
+                    region: us-east-1
+                    requestQueue: dev-shuttle-inbound
+                    responseQueue: dev-shuttle-outbound
 
 dataSource:
     pooled: true
     jmxExport: true
     driverClassName: com.mysql.jdbc.Driver
     dialect: org.hibernate.dialect.MySQL5InnoDBDialect
-    dbCreate: ''
     username: {{ database.username }}
     password: {{ database.password }}
     url: jdbc:mysql://{{ cluster_path }}/{{ database_schema }}?noAccessToProcedureBodies=true&useSSL=false&zeroDateTimeBehavior=convertToNull
