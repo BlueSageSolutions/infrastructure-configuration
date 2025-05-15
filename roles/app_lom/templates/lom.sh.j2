@@ -1,4 +1,5 @@
 {% set loc_context  = ""  if root_context else "lom" %}
+{% set sso_flag  = "true"  if sso else "false" %}
 #!/bin/bash
 PORT=8197
 CONTEXT={{ loc_context }}
@@ -11,7 +12,7 @@ COMMONOPTS+=" -Dconfig.location=$MY_PATH/config.groovy -Djava.io.tmpdir=$MY_PATH
 COMMONOPTS+=" -Djava.util.Arrays.useLegacyMergeSort=true"
 # COMMONOPTS+=" -javaagent:$MY_PATH/newrelic/newrelic.jar"
 # set context path for SAML SSO usage (return to application button on logout page)
-TEMPOPTS=" -Dcontext=/$CONTEXT -DuseSSO=false"
+TEMPOPTS=" -Dcontext=/$CONTEXT -DuseSSO={{ sso_flag }}"
 
 cd $MY_PATH
 unzip -p $JAR META-INF/MANIFEST.MF | grep -q  "grails\.plugin\.standalone"

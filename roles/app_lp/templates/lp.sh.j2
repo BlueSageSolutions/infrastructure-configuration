@@ -1,3 +1,4 @@
+{% set sso_flag  = "true"  if sso else "false" %}
 #!/bin/bash
 PORT=8090
 CONTEXT=
@@ -8,7 +9,7 @@ JVM4=/usr/lib/jvm/java-11-amazon-corretto/bin/java
 COMMONOPTS="-server -DexternalRulesEngine=true -Djdk.tls.client.protocols=TLSv1.2 -Dhttps.protocols=TLSv1.2 -Djava.security.egd=file:///dev/./urandom -Dsun.net.http.retryPost=false"
 COMMONOPTS+=" -Dconfig.location=$MY_PATH/config.groovy -Djava.io.tmpdir=$MY_PATH/tmp"
 #COMMONOPTS+=" -javaagent:$MY_PATH/newrelic/newrelic.jar"
-TEMPOPTS=""
+TEMPOPTS=" -DuseSSO={{ sso_flag }}"
 
 cd $MY_PATH
 sudo find tmp -type d -name "nmls*" | sudo xargs rm -fr

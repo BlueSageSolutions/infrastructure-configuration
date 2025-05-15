@@ -1,4 +1,5 @@
 {% set loc_context  = ""  if root_context else "crm" %}
+{% set sso_flag  = "true"  if sso else "false" %}
 #!/bin/bash
 PORT=8097
 CONTEXT={{ loc_context }}
@@ -10,7 +11,7 @@ COMMONOPTS="-server -DexternalRulesEngine=true -Djdk.tls.client.protocols=TLSv1.
 COMMONOPTS+=" -Dconfig.location=$MY_PATH/config.groovy -Djava.io.tmpdir=$MY_PATH/tmp"
 COMMONOPTS+=" -Djava.util.Arrays.useLegacyMergeSort=true"
 #COMMONOPTS+=" -javaagent:$MY_PATH/newrelic/newrelic.jar"
-TEMPOPTS=""
+TEMPOPTS=" -DuseSSO={{ sso_flag }}"
 
 cd $MY_PATH
 unzip -p $JAR META-INF/MANIFEST.MF | grep -q  "grails\.plugin\.standalone"
