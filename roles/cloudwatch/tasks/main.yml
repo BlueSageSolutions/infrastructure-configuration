@@ -3,11 +3,9 @@
   get_url:
     url: https://s3.us-east-1.amazonaws.com/amazoncloudwatch-agent-us-east-1/debian/amd64/latest/amazon-cloudwatch-agent.deb
     dest: /home/ubuntu/
-  become: yes # didn't need this before..
 
 - name: Install the cloudwatch agent package
   command: dpkg -i -E /home/ubuntu/amazon-cloudwatch-agent.deb
-  become: yes
 
 - name: Copy the configuration file in json format
   copy:
@@ -16,7 +14,6 @@
     owner: root
     group: root
     mode: '0755'
-  become: yes
 
 - name: Start the cloudwatch agent with new config file
   command: /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -s -c file:/opt/aws/amazon-cloudwatch-agent/etc/amazon-cloudwatch-agent.json
@@ -25,7 +22,6 @@
 - name: Check if amazon-cloudwatch-agent is running
   shell: /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -m ec2 -a status| grep -i running
   register: cw_agent_output
-  become: yes
 
 - debug:
     var: cw_agent_output.stdout

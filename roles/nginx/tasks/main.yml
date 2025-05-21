@@ -2,57 +2,36 @@
   run_once: true
   set_fact:
     app_templates: ["lendingservices", "lp", "crm", "portal", "admin", "hydra", "lom", "sfa", "hip", "shuttle"]
-  tags:
-    - nginx
 
 - name: Update apt
   shell: sudo apt update
-  become: yes
-  tags:
-    - nginx
 
 - name: Install packages
-  become: yes
   expect:
     command: sudo apt install curl gnupg2 ca-certificates lsb-release ubuntu-keyring
     responses:
       "Do you want to continue?": "Y"
-  tags:
-    - nginx
 
 - name: install and enable nginx
   import_tasks: install_enable.yml
-  become: yes
-  tags:
-    - nginx
 
 - name: install and enable nginx
   import_tasks: push_global_config.yml
-  become: yes
-  tags:
-    - nginx
 
 - name: push config files
   include_tasks: push_config.yml
   vars:
     port: "{{ item }}"
   loop: "{{ nginx.keys() | list }}"
-  tags:
-    - nginx
 
 - name: create ssl file
   include_tasks: create_ssl.yml
   vars:
     port: "{{ item }}"
   loop: "{{ nginx.keys() | list }}"
-  tags:
-    - nginx
 
 - name: restart nginx
   service: 
     name: nginx
     state: restarted
     enabled: yes
-  become: yes  
-  tags:
-    - nginx

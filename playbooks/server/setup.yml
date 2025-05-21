@@ -11,32 +11,56 @@
   tasks:
     # should this be a role?
     - name: Set .aws/config
-      include_tasks: tasks/aws_config.yml
+      include_tasks: 
+        file: ../../tasks/aws_config.yml
+        apply:
+          tags: always
+      tags: always
+
 
     - name: Run cloudwatch tasks
       include_role:
         name: cloudwatch
+        apply:
+          tags: always
+          become: yes
+      tags: always
 
     # should this be a role?
     - name: Set vim config
-      include_tasks: tasks/vim.yml
-            
+      include_tasks:
+        file: ../../tasks/vim.yml
+        apply:
+          tags: always
+      tags: always
+  
     - name: Run nginx tasks
       include_role:
         name: nginx
+        apply:
+          tags: [always, nginx]
+          become: yes
+      tags: [always, nginx]
+
 
     - name: Run applications tasks
       include_role:
         name: "app_{{ item }}"
+        apply:
+          tags: always
+          become: yes
       when: item in ["lendingservices", "lp", "crm", "portal", "admin", "hydra", "hip", "lom", "shuttle"]
       loop: "{{ apps }}"
+      tags: always
+
 
     - name: restart nginx
       service: 
         name: nginx
         state: restarted
         enabled: yes
-      become: yes      
+      become: yes
+      tags: [always]
 
     - name: restart apps
       shell: |
@@ -44,7 +68,11 @@
       loop: "{{ apps }}"
       when: item in ["lendingservices", "lp", "crm", "portal", "admin", "hydra", "lom", "shuttle"]
       become: yes
+      tags: always
 
-    # - name: Install new relic agent
-    #   include_role:
-    #     name: install_newrelic_java_agent
+    - name: Install new relic agent
+      include_role:
+        name: install_newrelic_agent
+        apply:
+          tags: [prod, newrelic]
+      tags: [never, prod, newrelic]

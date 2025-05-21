@@ -31,13 +31,16 @@ def inventory_template(
     instances: List[Instance] = get_ec2_instances(ec2_client=ec2_client, config=config)
     nginx_port_mappings: List[NginxPortMapping] = get_nginx_port_mapping(ssm_client=ssm_client, config=config, instances=instances)
 
+    is_bluedlp = True if config.get_client_code() == "bluedlp" else False
+
     template_data = {
         "environments": config.get_environments(),
         "client_code": config.get_client_code(),
         "instances": instances,
         "client_account_aws_profile": client_account_aws_profile,
         "ssh_private_key_file_path": config.get_ssh_key_filepath(),
-        "nginx_port_mappings": nginx_port_mappings
+        "nginx_port_mappings": nginx_port_mappings,
+        "is_bluedlp": is_bluedlp
     }
 
     validate_template_vars(template_data)
