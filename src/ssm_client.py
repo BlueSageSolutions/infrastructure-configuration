@@ -98,9 +98,9 @@ class NginxPortMapping(BaseModel):
         return mappings
 
     @property
-    def app_name(self) -> str:
+    def server(self) -> str:
         return self.Name.split("/")[-1].split("-")[0]
 
     @staticmethod
-    def get_parameter_path(client_code: str, env: str, app: str):
-        return f"/secrets/{client_code}/{env}/nginx/{app}-ports"
+    def get_parameter_path(client_code: str, env: str, server: str):
+        return f"/secrets/{client_code}/{env}/nginx/{server}-ports"

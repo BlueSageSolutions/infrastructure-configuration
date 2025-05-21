@@ -3,7 +3,7 @@
   hosts:
 {%- set instances = instances | selectattr("env", "equalto", env) %}
 {%- for instance in instances %}
-  {% set nginx_ports = nginx_port_mappings | selectattr("app_name", "equalto", instance.get_name().split("-")[-1]) | list%}
+  {% set nginx_ports = nginx_port_mappings | selectattr("server", "equalto", instance.get_name().split("-")[-1]) | list%}
     {{ instance.get_name().replace('-', '_') }}:
       ansible_host: {{ instance.get_ip_address() }}
       apps: {{ instance.get_apps() }}

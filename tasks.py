@@ -33,7 +33,7 @@ def inventory_template(
 
     template_data = {
         "environments": config.get_environments(),
-        "client_code": client_code,
+        "client_code": config.get_client_code(),
         "instances": instances,
         "client_account_aws_profile": client_account_aws_profile,
         "ssh_private_key_file_path": config.get_ssh_key_filepath(),
@@ -45,10 +45,10 @@ def inventory_template(
     templater: Templater = Templater.new(config=config)
     rendered_template = templater.render(template_data=template_data)
     templater.write_template(
-        rendered_template=rendered_template, client_code=client_code
+        rendered_template=rendered_template, client_code=config.get_client_code()
     )
 
-    update_inventory_group(config=config, client_code=client_code)
+    update_inventory_group(config=config, client_code=config.get_client_code())
 
 def get_ec2_instances(ec2_client: Ec2Client, config: Config) -> List[Instance]:
     ec2_response: Ec2ClientResponse = ec2_client.get_instances_by_environment(
@@ -64,9 +64,14 @@ def get_nginx_port_mapping(ssm_client: SsmClient, config: Config, instances: Lis
     parameter_names: List[str] = []
 
     for instance in instances:
-        app = instance.get_name().split(f"{instance.env}-")[-1].split("-")[0]
+        server = instance.get_name().split(f"{instance.env}-")[-1].split("-")[0]
         env = instance.env
-        parameter_names.append(NginxPortMapping.get_parameter_path(client_code=client_code, env=env, app=app))
+
+        if client_code == "bluedlp":
+            sub_client = instance.get_name().split(f"{instance.env}-")[0].split("-")[0]
+            parameter_names.append(NginxPortMapping.get_parameter_path(client_code=sub_client, env=env, server=server))
+        else:
+            parameter_names.append(NginxPortMapping.get_parameter_path(client_code=client_code, env=env, server=server))
 
     ssm_response: GetParametersResponse = ssm_client.get_parameters_by_name(
         names=parameter_names
