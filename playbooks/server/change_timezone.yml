@@ -1,0 +1,35 @@
+---
+- name: Change Timezone
+  hosts: all
+  gather_facts: no
+  vars:
+    client: "{{ inventory_hostname.split('_')[0] }}"
+    env: "{{ inventory_hostname.split('_')[1] }}"
+    apps: "{{ hostvars[inventory_hostname].apps }}"
+  tasks:
+    - name: Change Timezone on Server
+      shell: |
+        sudo timedatectl set-timezone {{ timezone }}
+        sudo timedatectl set-ntp on
+
+    - name: Change Timezone in config.groovy
+      lineinfile:
+        path: /opt/bin/{{ item }}/config.groovy
+        line: dateTime.displayTimeZone = "{{ timezone }}"
+      when: item in ["lendingservices", "lp", "crm", "lom"]
+      loop: "{{ apps }}"
+
+    - name: Change Timezone in config.groovy
+      lineinfile:
+        path: /opt/bin/{{ item }}/config.groovy
+        line: dateTime.pricingTimeZone = "{{ timezone }}"
+      when: item in ["lendingservices", "lp", "crm", "lom"]
+      loop: "{{ apps }}"
+
+    - name: restart apps
+      shell: |
+        systemctl restart {{ item }}.service
+      loop: "{{ apps }}"
+      when: item in ["lendingservices", "lp", "crm", "lom"]
+      become: yes
+      
