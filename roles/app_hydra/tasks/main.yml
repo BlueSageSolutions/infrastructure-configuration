@@ -23,5 +23,5 @@
 
 - name: push config files
   import_tasks: push_config.yml
-  # when: legacy == false
+  when: legacy == false
 
