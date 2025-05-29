@@ -6,7 +6,7 @@
     client: "{{ inventory_hostname.split('_')[0] }}"
     env: "{{ inventory_hostname.split('_')[1] }}"
     apps: "{{ hostvars[inventory_hostname].apps }}"
-    bss_devops_aws_profile: "it-devops-bss-devops"
+    bss_devops_aws_profile: "sso-devops-bss-devops"
 
   tasks:
     # should this be a role?
@@ -49,7 +49,7 @@
         apply:
           tags: always
           become: yes
-      when: item in ["lendingservices", "lp", "crm", "portal", "admin", "hydra", "hip", "lom", "shuttle"]
+      when: item in ["lendingservices", "lp", "crm", "portal", "admin", "lom", "hydra", "lion", "sfa", "hip", "shuttle"]
       loop: "{{ apps }}"
       tags: always
 

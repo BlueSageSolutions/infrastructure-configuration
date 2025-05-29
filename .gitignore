@@ -5,3 +5,4 @@ inventory/lower/*.yml
 downloads/*
 !.gitkeep
 *.DS_Store
+.vscode/*
