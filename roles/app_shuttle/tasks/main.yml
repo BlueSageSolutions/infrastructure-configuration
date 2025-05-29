@@ -1,6 +1,10 @@
 - name: create directories
   import_tasks: create_dirs.yml
 
+- name: Download shuttle jar from s3
+  shell: |
+    aws s3api get-object --bucket bss-application-management --key newrelic/shuttleApp_0.52.34.jar /opt/bin/shuttle/shuttleApp.jar
+
 - name: install java 11
   shell: |
     apt update -y
