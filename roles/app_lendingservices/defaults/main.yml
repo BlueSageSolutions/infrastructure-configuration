@@ -1,2 +1,3 @@
 collation: true
 activemq_core_logic: "CORELOGIC.{{ client|upper }}.{{ env|upper }}"
+legacy: false

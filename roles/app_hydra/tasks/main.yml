@@ -19,7 +19,9 @@
 
 - name: get database data
   import_tasks: ../../../tasks/get_db_data.yml
+  when: legacy == false
 
 - name: push config files
   import_tasks: push_config.yml
+  # when: legacy == false
 

@@ -2,3 +2,4 @@
   template:
     src: templates/config.groovy.j2
     dest: /opt/bin/hip/config.groovy
+  when: legacy == false

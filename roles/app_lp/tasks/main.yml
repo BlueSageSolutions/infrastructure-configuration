@@ -11,6 +11,7 @@
 
 - name: get database data
   import_tasks: ../../../tasks/get_db_data.yml
+  when: legacy == false
 
 - name: push config files
   import_tasks: push_config.yml
@@ -19,3 +20,4 @@
   import_tasks: ../../../tasks/jwt_token.yml
   vars:
     app: lp
+  when: legacy == false

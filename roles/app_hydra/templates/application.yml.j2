@@ -17,3 +17,11 @@ dataSource:
     username: {{ database.username }}
     password: {{ database.password }}
     url: jdbc:mysql://{{ cluster_path }}/{{ database_schema }}?noAccessToProcedureBodies=true&useSSL=false&zeroDateTimeBehavior=convertToNull
+
+{% if env == "dev" %}
+hydra:
+  config:
+    dbMigration:
+        url: https://build.bluesageusa.com/migrationsapitest/repeatable/
+        client: {{ client }}
+{% endif %}

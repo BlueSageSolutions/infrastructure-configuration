@@ -8,3 +8,4 @@
   template:
     src: templates/config.groovy.j2
     dest: /opt/bin/admin/config.groovy
+  when: legacy == false

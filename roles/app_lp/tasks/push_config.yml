@@ -8,13 +8,14 @@
   template:
     src: templates/config.groovy.j2
     dest: /opt/bin/lp/config.groovy
+  when: legacy == false
 
 - name: custom timezone - config.groovy
   lineinfile:
     path: /opt/bin/lp/config.groovy
     line: "{{ item.line }}"
-  when: config_groovy_timezone is defined
   loop:
     - line: "\n"
     - line: dateTime.displayTimeZone = "{{ config_groovy_timezone }}"
     - line: dateTime.pricingTimeZone = "{{ config_groovy_timezone }}"
+  when: config_groovy_timezone is defined and legacy == false

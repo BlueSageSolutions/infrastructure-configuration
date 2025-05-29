@@ -1,3 +1,4 @@
 root_context: false
 collation: true
 sso: false
+legacy: false
