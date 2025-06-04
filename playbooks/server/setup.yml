@@ -61,6 +61,13 @@
       become: yes
       tags: [always]
 
+    - name: Install new relic agent
+      include_role:
+        name: install_newrelic_agent
+        apply:
+          tags: [prod, newrelic]
+      tags: [never, prod, newrelic]
+
     - name: restart apps
       shell: |
         systemctl restart {{ item }}.service
@@ -68,10 +75,3 @@
       when: item in ["lendingservices", "lp", "crm", "portal", "admin", "hydra", "lom", "shuttle"]
       become: yes
       tags: always
-
-    - name: Install new relic agent
-      include_role:
-        name: install_newrelic_agent
-        apply:
-          tags: [prod, newrelic]
-      tags: [never, prod, newrelic]

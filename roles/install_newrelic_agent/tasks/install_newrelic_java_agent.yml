@@ -2,7 +2,7 @@
   run_once: true
   set_fact:
     java_agent_version: 7.11.1
-    output_dir: ./downloads
+    output_dir: ../../downloads
     zip_file_name: newrelic-java.zip
     newrelic_apps: ["lendingservices", "lp", "crm", "portal", "admin", "hip", "servicing"]
 
