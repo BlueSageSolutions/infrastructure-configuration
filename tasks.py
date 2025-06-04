@@ -74,6 +74,8 @@ def get_nginx_port_mapping(ssm_client: SsmClient, config: Config, instances: Lis
             sub_client = instance.get_name().split(f"{instance.env}-")[0].split("-")[0]
             parameter_names.append(NginxPortMapping.get_parameter_path(client_code=sub_client, env=env, server=server))
         else:
+            if client_code == "springeq":
+                parameter_names.append(NginxPortMapping.get_parameter_path(client_code="springeqfirst", env=env, server=server))
             parameter_names.append(NginxPortMapping.get_parameter_path(client_code=client_code, env=env, server=server))
 
     ssm_response: GetParametersResponse = ssm_client.get_parameters_by_name(

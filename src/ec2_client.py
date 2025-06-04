@@ -62,6 +62,14 @@ class Instance(BaseModel):
     @property
     def env(self) -> str:
         return self.__parse_tags("Env")
+
+    @property
+    def client(self) -> str:
+        return self.get_name().split("-")[0]
+
+    @property
+    def server(self) -> str:
+        return self.get_name().split("-")[2]
     
     def get_ip_address(self) -> str:
         return self.PrivateIpAddress

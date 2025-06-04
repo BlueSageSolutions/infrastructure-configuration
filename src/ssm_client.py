@@ -104,6 +104,10 @@ class NginxPortMapping(BaseModel):
     @property
     def client(self) -> str:
         return self.Name.split("/")[2]
+    
+    @property
+    def env(self) -> str:
+        return self.Name.split("/")[3]
 
     @staticmethod
     def get_parameter_path(client_code: str, env: str, server: str):
