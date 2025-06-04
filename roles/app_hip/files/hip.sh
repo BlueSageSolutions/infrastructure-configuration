@@ -5,7 +5,7 @@ JAR=$(basename $0 .sh).jar  # get .jar filename and path from this file
 MY_PATH=$(dirname $0)
 JVM2=/usr/lib/jvm/zulu-7-amd64/bin/java
 JVM4=/usr/lib/jvm/java-11-amazon-corretto/bin/java
-COMMONOPTS="-server -DexternalRulesEngine=true -Djdk.tls.client.protocols=TLSv1.2 -Dhttps.protocols=TLSv1,TLSv1.1,TLSv1.2 -Djava.security.egd=file:///dev/./urandom -Dsun.net.http.retryPost=false"
+COMMONOPTS="-server -DexternalRulesEngine=true -Djava.security.egd=file:///dev/./urandom -Dsun.net.http.retryPost=false"
 COMMONOPTS+=" -Dconfig.location=$MY_PATH/config.groovy -Djava.io.tmpdir=$MY_PATH/tmp"
 COMMONOPTS+=" -Djava.util.Arrays.useLegacyMergeSort=true"
 #COMMONOPTS+=" -javaagent:$MY_PATH/newrelic/newrelic.jar"
