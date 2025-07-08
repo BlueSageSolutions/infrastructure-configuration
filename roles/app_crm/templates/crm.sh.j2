@@ -11,7 +11,7 @@ COMMONOPTS="-server -DexternalRulesEngine=true -Djava.security.egd=file:///dev/.
 COMMONOPTS+=" -Dconfig.location=$MY_PATH/config.groovy -Djava.io.tmpdir=$MY_PATH/tmp"
 COMMONOPTS+=" -Djava.util.Arrays.useLegacyMergeSort=true"
 #COMMONOPTS+=" -javaagent:$MY_PATH/newrelic/newrelic.jar"
-TEMPOPTS=" -DuseSSO={{ sso_flag }}"
+TEMPOPTS=" -Duse{{ sso_provider }}SSO={{ sso_flag }}"
 
 cd $MY_PATH
 unzip -p $JAR META-INF/MANIFEST.MF | grep -q  "grails\.plugin\.standalone"

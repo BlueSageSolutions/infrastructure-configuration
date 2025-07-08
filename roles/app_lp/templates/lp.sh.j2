@@ -9,7 +9,7 @@ JVM4=/usr/lib/jvm/java-11-amazon-corretto/bin/java
 COMMONOPTS="-server -DexternalRulesEngine=true -Djava.security.egd=file:///dev/./urandom -Dsun.net.http.retryPost=false"
 COMMONOPTS+=" -Dconfig.location=$MY_PATH/config.groovy -Djava.io.tmpdir=$MY_PATH/tmp"
 #COMMONOPTS+=" -javaagent:$MY_PATH/newrelic/newrelic.jar"
-TEMPOPTS=" -DuseSSO={{ sso_flag }}"
+TEMPOPTS=" -Duse{{ sso_provider }}SSO={{ sso_flag }}"
 
 cd $MY_PATH
 sudo find tmp -type d -name "nmls*" | sudo xargs rm -fr

@@ -1,4 +1,5 @@
 root_context: false
 collation: true
 sso: false
+sso_provider: ""
 legacy: false

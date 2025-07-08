@@ -1,6 +1,7 @@
 root_context: false
 collation: true
 sso: false
+sso_provider: ""
 activemq_real_ec: "REALEC.{{ client|upper }}.{{ env|upper }}"
 activemq_closing_corp: "CLOSINGCORP.{{ client|upper }}.{{ env|upper }}"
 rewrite_batched_statements: "true"
