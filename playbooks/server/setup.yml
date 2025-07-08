@@ -49,9 +49,16 @@
         apply:
           tags: always
           become: yes
-      when: item in ["lendingservices", "lp", "crm", "portal", "admin", "lom", "hydra", "lion", "sfa", "hip", "shuttle"]
+      when: item in ["lendingservices", "lp", "crm", "portal", "admin", "lom", "hydra", "lion", "sfa", "hip", "shuttle", "servicing"]
       loop: "{{ apps }}"
       tags: always
+
+    - name: Install new relic agent
+      include_role:
+        name: install_newrelic_agent
+        apply:
+          tags: [prod, newrelic]
+      tags: [never, prod, newrelic]
 
     - name: restart nginx
       service: 
@@ -60,13 +67,6 @@
         enabled: yes
       become: yes
       tags: [always]
-
-    - name: Install new relic agent
-      include_role:
-        name: install_newrelic_agent
-        apply:
-          tags: [prod, newrelic]
-      tags: [never, prod, newrelic]
 
     - name: restart apps
       shell: |

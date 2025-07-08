@@ -1,0 +1,10 @@
+#!/bin/bash
+
+export GOOGLE_APPLICATION_CREDENTIALS="/opt/bin/servicing/config/digital-servicing-platform-a7f789474795.json"
+JAVA_PATH='/usr/lib/jvm/java-21-openjdk-amd64/bin/java'
+MY_PATH="/opt/bin/servicing"
+COMMONOPTS+=" -javaagent:$MY_PATH/newrelic/newrelic.jar"
+TEMPOPTS=""
+cd $MY_PATH
+
+$JAVA_PATH $COMMONOPTS $OPTS $TEMPOPTS -cp $MY_PATH -jar $MY_PATH/quarkus-app/quarkus-run.jar

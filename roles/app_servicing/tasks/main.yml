@@ -3,3 +3,16 @@
     path: /opt/bin/servicing/config
     state: directory
     mode: 0777
+
+- name: upload servicing files 
+  import_tasks: ../../../tasks/upload_files.yml
+  vars:
+    files:
+      servicing.sh: /opt/bin/servicing/
+  become: true
+
+- name: give permissions to startup file
+  file:
+    path: /opt/bin/servicing/servicing.sh
+    mode: 0755
+  become: true
