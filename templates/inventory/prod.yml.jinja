@@ -3,9 +3,15 @@
   hosts:
 {%- set instances = instances | selectattr("env", "equalto", env) %}
 {%- for instance in instances %}
+  {% set nginx_ports = nginx_port_mappings | selectattr("server", "equalto", instance.server) | selectattr("env", "equalto", instance.env) | selectattr("client", "equalto", instance.client) | list%}
     {{ instance.get_name().replace('-', '_') }}:
       ansible_host: {{ instance.get_ip_address() }}
       apps: {{ instance.get_apps() }}
+      nginx:
+      {%- for (port, apps) in nginx_ports[0].mappings().items() %}
+        {{ port }}: 
+          nginx_apps: {{ apps }}
+      {%- endfor %}
 {% endfor %}
 {% endfor %}
 
