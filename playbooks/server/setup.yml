@@ -7,6 +7,11 @@
     env: "{{ inventory_hostname.split('_')[1] }}"
     apps: "{{ hostvars[inventory_hostname].apps }}"
     bss_devops_aws_profile: "sso-devops-bss-devops"
+    controller: "{{ hostvars[inventory_hostname].controller | default(False) }}"
+    group: "{{ client }}_{{ env }}"
+    aws_key: "{{ hostvars[inventory_hostname].ansible_ssh_private_key_file.split('/')[-1] }}"
+    disable_batch: "{{ hostvars[inventory_hostname].disable_batch | default(False) }}"
+    disable_pwd_encode: "{{ hostvars[inventory_hostname].disable_pwd_encode | default(False) }}"
 
   tasks:
     # should this be a role?
@@ -42,7 +47,6 @@
           become: yes
       tags: [always, nginx]
 
-
     - name: Run applications tasks
       include_role:
         name: "app_{{ item }}"
@@ -58,7 +62,16 @@
         name: install_newrelic_agent
         apply:
           tags: [prod, newrelic]
+      loop: "{{ apps }}"
+      when: item in ["lendingservices", "lp", "crm", "portal", "admin", "servicing"]
       tags: [never, prod, newrelic]
+
+    - name: Setup Prod Servers
+      include_role:
+        name: server_prod
+        apply:
+          tags: [prod]
+      tags: [never, prod]
 
     - name: restart nginx
       service: 
@@ -66,7 +79,7 @@
         state: restarted
         enabled: yes
       become: yes
-      tags: [always]
+      tags: [never, restart]
 
     - name: restart apps
       shell: |
@@ -74,4 +87,4 @@
       loop: "{{ apps }}"
       when: item in ["lendingservices", "lp", "crm", "portal", "admin", "hydra", "lom", "shuttle"]
       become: yes
-      tags: always
+      tags: [never, restart]
