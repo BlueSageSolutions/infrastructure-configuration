@@ -4,12 +4,19 @@
     state: directory
     mode: 0777
 
-- name: upload servicing files 
-  import_tasks: ../../../tasks/upload_files.yml
-  vars:
-    files:
-      servicing.sh: /opt/bin/servicing/
-  become: true
+- name: get app user creds
+  set_fact:
+    app_user: "{{ lookup('amazon.aws.aws_secret', 'servicing-app-user-' + env + '-' + 'aws-credentials', aws_profile=aws_profile) }}"
+
+- name: get app user keys
+  set_fact:
+    app_user_access_key: "{{ app_user.access_key }}"
+    app_user_secret_key: "{{ app_user.secret_key }}"
+
+- name: template - servicing.sh
+  template:
+    src: templates/servicing.sh.j2
+    dest: /opt/bin/servicing/servicing.sh
 
 - name: give permissions to startup file
   file:

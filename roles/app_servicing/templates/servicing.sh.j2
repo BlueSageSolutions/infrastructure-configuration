@@ -3,6 +3,7 @@
 export GOOGLE_APPLICATION_CREDENTIALS="/opt/bin/servicing/config/digital-servicing-platform-a7f789474795.json"
 JAVA_PATH='/usr/lib/jvm/java-21-openjdk-amd64/bin/java'
 MY_PATH="/opt/bin/servicing"
+OPTS="-Daws.accessKeyId={{ app_user_access_key | default('') }} -Daws.secretAccessKey={{ app_user_secret_key | default('') }}"
 COMMONOPTS+=" -javaagent:$MY_PATH/newrelic/newrelic.jar"
 TEMPOPTS=""
 cd $MY_PATH
