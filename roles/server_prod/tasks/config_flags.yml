@@ -1,0 +1,15 @@
+- name: Disable batch jobs on certain instances
+  lineinfile:
+    path: /opt/bin/{{ item }}/config.groovy
+    line: batchJobs.initialize = false
+    state: present
+  loop: "{{ apps }}"
+  when: disable_batch and item in ["lp"]
+
+- name: Disable password encoding on certain instances
+  lineinfile:
+    path: /opt/bin/{{ item }}/config.groovy
+    line: app.encodePasswords = false
+    state: present
+  loop: "{{ apps }}"
+  when: disable_pwd_encode and item in ["lendingservices", "lp"]

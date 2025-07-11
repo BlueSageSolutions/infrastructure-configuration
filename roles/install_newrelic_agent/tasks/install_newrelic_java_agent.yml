@@ -38,7 +38,7 @@
     src: ../../../templates/newrelic/newrelic.yml.j2
     dest: '/opt/bin/{{item}}/newrelic/newrelic.yml'
   vars:
-    app_name: "{{ client | lower }}-{{ env | lower }}-{{ item | lower }}-{{ inventory_hostname | split('_') | last | lower }}"
+    app_name: "{{ inventory_hostname | regex_replace('_', '-') | lower }}"
     labels: app:{{item | lower}};client:{{client| lower}};env:{{env | lower}}
   become: yes
 

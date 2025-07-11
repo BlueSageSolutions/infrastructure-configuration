@@ -1,0 +1,6 @@
+- name: install jq
+  shell: |
+    apt install -y jq
+  args:
+    creates: /usr/bin/jq
+  become: true
