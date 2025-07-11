@@ -14,8 +14,13 @@ shuttle:
                     accessKey: {{ shuttle_access_key | default('') }}
                     secretKey: {{ shuttle_secret_key | default('') }}
                     region: us-east-1
+{% if bluedlp %}
+                    requestQueue: {{ client }}-{{ env }}-shuttle-inbound
+                    responseQueue: {{ client }}-{{ env }}-shuttle-outbound
+{% else %}
                     requestQueue: dev-shuttle-inbound
                     responseQueue: dev-shuttle-outbound
+{% endif %}
 
 dataSource:
     pooled: true

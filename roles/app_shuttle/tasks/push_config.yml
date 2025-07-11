@@ -23,16 +23,7 @@
 
 - name: template - application.yml
   vars: 
-    cluster_path: "{{ database.hostname | replace('cluster-', 'cluster-ro-') }}"
-  template:
-    src: templates/application.yml.j2
-    dest: /opt/bin/shuttle/application.yml
-  when: env not in ["dev"]
-
-- name: template - application.yml
-  vars: 
     cluster_path: "{{ database.hostname }}"
   template:
     src: templates/application.yml.j2
     dest: /opt/bin/shuttle/application.yml
-  when: env in ["dev"]
