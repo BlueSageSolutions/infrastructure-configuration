@@ -5,7 +5,6 @@ from src import Config
 from src.ec2_client import Ec2Client, Ec2ClientResponse, Instance
 from src.templater import Templater
 from src.ssm_client import SsmClient, GetParametersResponse, NginxPortMapping
-from src.inventory_group import update_inventory_group
 
 
 @task
@@ -50,8 +49,6 @@ def inventory_template(
     templater.write_template(
         rendered_template=rendered_template, client_code=config.get_client_code()
     )
-
-    update_inventory_group(config=config, client_code=config.get_client_code())
 
 def get_ec2_instances(ec2_client: Ec2Client, config: Config) -> List[Instance]:
     ec2_response: Ec2ClientResponse = ec2_client.get_instances_by_environment(
