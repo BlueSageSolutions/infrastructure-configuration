@@ -45,10 +45,17 @@ def inventory_template(
     validate_template_vars(template_data)
     
     templater: Templater = Templater.new(config=config)
-    rendered_template = templater.render(template_data=template_data)
-    templater.write_template(
-        rendered_template=rendered_template, client_code=config.get_client_code()
-    )
+    
+    try:
+        rendered_template = templater.render(template_data=template_data)
+        templater.write_template(
+            rendered_template=rendered_template, client_code=config.get_client_code()
+        )
+    except Exception as e:
+        print(f"Error rendering template: {e}")
+        print(f"Instances: {instances}")
+        print(f"Nginx port mappings: {nginx_port_mappings}")
+
 
 def get_ec2_instances(ec2_client: Ec2Client, config: Config) -> List[Instance]:
     ec2_response: Ec2ClientResponse = ec2_client.get_instances_by_environment(
