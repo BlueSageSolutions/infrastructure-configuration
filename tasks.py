@@ -53,8 +53,13 @@ def inventory_template(
         )
     except Exception as e:
         print(f"Error rendering template: {e}")
-        print(f"Instances: {instances}")
-        print(f"Nginx port mappings: {nginx_port_mappings}")
+        print(f"Instances:\n")
+        for i in instances:
+            print(f"{i}\n")
+        print("----------------------------")
+        print(f"Nginx port mappings:\n")
+        for p in nginx_port_mappings:
+            print(f"{p}\n")
 
 
 def get_ec2_instances(ec2_client: Ec2Client, config: Config) -> List[Instance]:
