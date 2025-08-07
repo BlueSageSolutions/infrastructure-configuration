@@ -3,8 +3,7 @@ from typing import List
 
 class Config:
     
-    def __init__(self, is_prod: bool, environments: List[str], output_directory: str, client_code: str):
-        self._is_prod = is_prod
+    def __init__(self, environments: List[str], output_directory: str, client_code: str):
         self._environments = environments
         self._output_directory = output_directory
         self._client_code = client_code
@@ -22,21 +21,20 @@ class Config:
         return "prod" if self.is_prod() else "lower"
     
     def get_ssh_key_filepath(self) -> str:
-        return f"../../../keys/{self._client_code}_{self.get_stage()}.pem"
+        return f"../../../keys/{'bluedlp' if self.is_bluedlp() else self._client_code}_{self.get_stage()}.pem"
 
     def is_prod(self) -> bool:
-        return self._is_prod
+        return True if "prod" in self._environments else False
+    
+    def is_bluedlp(self) -> bool:
+        return True if self.get_client_code() == "bluedlp" else False
 
     @staticmethod
     def new(environments: str, client_code: str) -> Config:
-        is_prod = False
         output_directory = "inventory"
 
         environments = [e for e in environments.strip().split(",") if e != ""]
 
-        if "prod" in environments:
-            is_prod = True
-
-        return Config(is_prod=is_prod, environments=environments, output_directory=output_directory, client_code=client_code)
+        return Config(environments=environments, output_directory=output_directory, client_code=client_code)
         
 

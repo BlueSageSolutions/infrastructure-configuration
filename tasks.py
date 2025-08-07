@@ -27,39 +27,42 @@ def inventory_template(
     ec2_client: Ec2Client = Ec2Client.new(profile_name=client_account_aws_profile)
     ssm_client: SsmClient = SsmClient.new(profile_name=client_account_aws_profile)
 
-    instances: List[Instance] = get_ec2_instances(ec2_client=ec2_client, config=config)
-    nginx_port_mappings: List[NginxPortMapping] = get_nginx_port_mapping(ssm_client=ssm_client, config=config, instances=instances)
+    ec2_instances: List[Instance] = get_ec2_instances(ec2_client=ec2_client, config=config)
+    nginx_port_mappings: List[NginxPortMapping] = get_nginx_port_mapping(ssm_client=ssm_client, config=config, instances=ec2_instances)
 
-    is_bluedlp = True if config.get_client_code() == "bluedlp" else False
-
-    template_data = {
-        "environments": config.get_environments(),
-        "client_code": config.get_client_code(),
-        "instances": instances,
-        "client_account_aws_profile": client_account_aws_profile,
-        "ssh_private_key_file_path": config.get_ssh_key_filepath(),
-        "nginx_port_mappings": nginx_port_mappings,
-        "is_bluedlp": is_bluedlp
-    }
-
-    validate_template_vars(template_data)
+    clients = ["allcu", "mam", "trcu", "tib", "ctcb"] if config.is_bluedlp() else [f"{config.get_client_code()}"]
     
-    templater: Templater = Templater.new(config=config)
-    
-    try:
-        rendered_template = templater.render(template_data=template_data)
-        templater.write_template(
-            rendered_template=rendered_template, client_code=config.get_client_code()
-        )
-    except Exception as e:
-        print(f"Error rendering template: {e}")
-        print(f"Instances:\n")
-        for i in instances:
-            print(f"{i}\n")
-        print("----------------------------")
-        print(f"Nginx port mappings:\n")
-        for p in nginx_port_mappings:
-            print(f"{p}\n")
+    for client in clients:
+
+        instances = [i for i in ec2_instances if i.client.startswith(f"{client}")]
+
+        template_data = {
+            "environments": config.get_environments(),
+            "client_code": client,
+            "instances": instances,
+            "client_account_aws_profile": client_account_aws_profile,
+            "ssh_private_key_file_path": config.get_ssh_key_filepath(),
+            "nginx_port_mappings": nginx_port_mappings,
+            "is_bluedlp": config.is_bluedlp()
+        }
+
+        validate_template_vars(template_data)
+                
+        try:
+            templater: Templater = Templater.new(config=config)
+            rendered_template = templater.render(template_data=template_data)
+            templater.write_template(
+                rendered_template=rendered_template, client_code=client
+            )
+        except Exception as e:
+            print(f"Error rendering template: {e}")
+            print(f"Instances:\n")
+            for i in instances:
+                print(f"{i}\n")
+            print("----------------------------")
+            print(f"Nginx port mappings:\n")
+            for p in nginx_port_mappings:
+                print(f"{p}\n")
 
 
 def get_ec2_instances(ec2_client: Ec2Client, config: Config) -> List[Instance]:
