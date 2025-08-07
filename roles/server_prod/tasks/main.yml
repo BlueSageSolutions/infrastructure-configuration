@@ -27,6 +27,10 @@
 
 #TODO: need a wait here for someone to add the pub_key to GitHub
 
+- name: Prompt for confirmation
+  pause:
+    prompt: "Add public key from debug output to github (https://github.com/settings/keys). You must be logged in as BlueSage Builder. \nPress Enter when completed"
+
 - name: setup git repos
   import_tasks: git.yml
   when: controller
