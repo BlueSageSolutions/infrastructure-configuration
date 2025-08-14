@@ -6,12 +6,17 @@
     client: "{{ inventory_hostname.split('_')[0] }}"
     env: "{{ inventory_hostname.split('_')[1] }}"
     apps: "{{ hostvars[inventory_hostname].apps }}"
-    bss_devops_aws_profile: "sso-devops-bss-devops"
-    controller: "{{ hostvars[inventory_hostname].controller | default(False) }}"
+    # bss_devops_aws_profile: "sso-devops-bss-devops"
     group: "{{ client }}_{{ env }}"
     aws_key: "{{ hostvars[inventory_hostname].ansible_ssh_private_key_file.split('/')[-1] }}"
+    controller: "{{ hostvars[inventory_hostname].controller | default(False) }}"
     disable_batch: "{{ hostvars[inventory_hostname].disable_batch | default(False) }}"
     disable_pwd_encode: "{{ hostvars[inventory_hostname].disable_pwd_encode | default(False) }}"
+
+  vars_prompt:
+    - name: bss_devops_aws_profile
+      prompt: What is your devops aws profile?
+      private: false
 
   tasks:
     # should this be a role?
@@ -64,6 +69,8 @@
           tags: [prod, newrelic]
       loop: "{{ apps }}"
       when: item in ["lendingservices", "lp", "crm", "portal", "admin", "servicing"]
+      vars: 
+        aws_profile: "{{ bss_devops_aws_profile }}"
       tags: [never, prod, newrelic]
 
     - name: Setup Prod Servers
@@ -71,7 +78,7 @@
         name: server_prod
         apply:
           tags: [prod]
-      tags: [never, prod]
+      tags: [never, prod, git]
 
     - name: restart nginx
       service: 

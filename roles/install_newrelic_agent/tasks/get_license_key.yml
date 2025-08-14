@@ -1,3 +1,7 @@
+- name: Set aws Account Client as Fact
+  set_fact:
+    account_client: "{{ 'bluedlp' if bluedlp else client }}"
+
 - name: Get Client Account Id
   delegate_to: localhost
   run_once: true
@@ -11,10 +15,10 @@
                     }'
     )
 
-    CLIENT_ACCOUNT_METADATA=$(echo $QUERY_ACCOUNT_RESPONSE | jq '.data.actor.organization.accountManagement.managedAccounts.[] | select(.name == "{{client | lower}}")')
+    CLIENT_ACCOUNT_METADATA=$(echo $QUERY_ACCOUNT_RESPONSE | jq '.data.actor.organization.accountManagement.managedAccounts.[] | select(.name == "{{account_client | lower}}")')
 
     if [ -z "$CLIENT_ACCOUNT_METADATA" ]; then
-      echo Account associated with client {{client | lower}} was not found!
+      echo Account associated with client {{account_client | lower}} was not found!
       exit 1
     fi
 
@@ -44,7 +48,7 @@
   delegate_to: localhost
   run_once: true
   shell: |
-    SSM_PATH=/secrets/{{client | lower}}/prod/newrelic/license_key
+    SSM_PATH=/secrets/{{account_client | lower}}/prod/newrelic/license_key
     LICENSE_KEY=$(aws ssm get-parameter --name $SSM_PATH --with-decryption --query "Parameter.Value" --output text)
 
     if [ -z "$LICENSE_KEY" ]; then

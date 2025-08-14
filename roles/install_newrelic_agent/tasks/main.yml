@@ -2,7 +2,7 @@
   delegate_to: localhost
   run_once: true
   shell: |
-    API_KEY=$(aws ssm get-parameter --name /secrets/new_relic/api_key --with-decryption --query "Parameter.Value" --output text)
+    API_KEY=$(aws ssm get-parameter --name /secrets/new_relic/api_key --with-decryption --query "Parameter.Value" --output text --profile {{ aws_profile }})
 
     if [ -z "$API_KEY" ]; then
       echo Unable to read api key, are you logged in and able to read from bss-devops account?
