@@ -8,4 +8,6 @@ COMMONOPTS+=" -javaagent:$MY_PATH/newrelic/newrelic.jar"
 TEMPOPTS=""
 cd $MY_PATH
 
+sudo rm -rf /tmp/*
+
 $JAVA_PATH $COMMONOPTS $OPTS $TEMPOPTS -cp $MY_PATH -jar $MY_PATH/quarkus-app/quarkus-run.jar
