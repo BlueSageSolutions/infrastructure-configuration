@@ -78,7 +78,7 @@
         name: server_prod
         apply:
           tags: [prod]
-      tags: [never, prod, git]
+      tags: [never, prod, git, ssh]
 
     - name: restart nginx
       service: 

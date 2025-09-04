@@ -1,5 +1,7 @@
 - name: setup_prod_ssh
   import_tasks: ssh.yml
+  tags:
+    - ssh
 
 - name: setup_prod_config_flags
   import_tasks: config_flags.yml
@@ -24,12 +26,14 @@
 - debug:
     msg: "{{ pub_key.stdout }}"
   run_once: true
-
-#TODO: need a wait here for someone to add the pub_key to GitHub
+  tags:
+    - git
 
 - name: Prompt for confirmation
   pause:
     prompt: "Add public key from debug output to github (https://github.com/settings/keys). You must be logged in as BlueSage Builder. \nPress Enter when completed"
+  tags:
+    - git
 
 - name: setup git repos
   import_tasks: git.yml

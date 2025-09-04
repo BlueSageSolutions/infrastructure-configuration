@@ -24,7 +24,7 @@ if [[ $? -eq 0 ]]; then
 else
     echo "Using Evergreen - Grails 4"
     JVM=$JVM4
-    OPTS="-Xmx5g -Dserver.port=$PORT"
+    OPTS="-Xmx8g -Dserver.port=$PORT"
     OPTS+=" -Dserver.servlet.context-path=/$CONTEXT"
     if [[ -f $MY_PATH/logback.groovy ]]; then
         OPTS+=" -Dlogging.config=$MY_PATH/logback.groovy"

@@ -6,3 +6,4 @@ downloads/*
 !.gitkeep
 *.DS_Store
 .vscode/*
+test*.yml
