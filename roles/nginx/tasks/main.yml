@@ -1,7 +1,7 @@
 - name: set variables
   run_once: true
   set_fact:
-    app_templates: ["lendingservices", "lp", "crm", "portal", "admin", "hydra", "lom", "sfa", "hip", "shuttle"]
+    app_templates: ["lendingservices", "lp", "crm", "portal", "admin", "hydra", "lom", "sfa", "hip", "shuttle", "servicing"]
 
 - name: Update apt
   shell: sudo apt update

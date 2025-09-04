@@ -1,0 +1,11 @@
+[Unit]
+Description=Start Servicing server
+After=network.target
+
+[Service]
+ExecStart=/opt/bin/servicing/servicing.sh
+KillSignal=SIGKILL
+KillMode=mixed
+
+[Install]
+WantedBy=multi-user.target

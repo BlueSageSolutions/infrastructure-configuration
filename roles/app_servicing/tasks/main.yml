@@ -1,8 +1,28 @@
+- name: Update apt
+  shell: sudo apt update
+
+- name: Install OpenJDK 21
+  apt:
+    name: openjdk-21-jdk
+    state: present
+
+- name: ensure correct java version selected
+  alternatives:
+    name: java
+    path: /usr/lib/jvm/java-21-openjdk-amd64/bin/java
+
 - name: create servicing subdirectory
   file:
     path: /opt/bin/servicing/config
     state: directory
     mode: 0777
+
+- name: upload servicing files 
+  import_tasks: ../../../tasks/upload_files.yml
+  vars:
+    files:
+      servicing.service: /lib/systemd/system/
+  become: true
 
 - name: get app user creds
   set_fact:
